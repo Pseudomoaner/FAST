@@ -2,4 +2,4 @@
 
 The Feature-Assisted Segmenter/Tracker
 
-<img src="https://github.com/Pseudomoaner/FAST/blob/master/Imagery/TextLogoLarge.PNG" alt="FAST"/>
+<img src="https://raw.githubusercontent.com/Pseudomoaner/FAST/master/Imagery/TextLogoLarge.PNG" alt="FAST"/>
