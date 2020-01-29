@@ -13,3 +13,5 @@ Have you struggled with automated measurement of the movement of many closely-pa
 * No need for a Matlab license - FAST is also available as a free stand-alone application.
 
 ### Detailed documentation available at https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=start
+
+A publication detailing the implementation and functionality of FAST is currently under preparation. In the mean time, if you find this software useful, please cite it using the DOI 
