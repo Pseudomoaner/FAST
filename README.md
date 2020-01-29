@@ -1,5 +1,3 @@
-# FAST
+<img src="https://raw.githubusercontent.com/Pseudomoaner/FAST/master/Imagery/TextLogoLarge.png" alt="FAST" width="150"/>
 
-The Feature-Assisted Segmenter/Tracker
-
-<img src="https://raw.githubusercontent.com/Pseudomoaner/FAST/master/Imagery/TextLogoLarge.PNG" alt="FAST"/>
+## The Feature-Assisted Segmenter/Tracker
