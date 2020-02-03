@@ -14,6 +14,6 @@ Have you struggled with automated measurement of the movement of many closely-pa
 
 ### Detailed documentation available at https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=start
 
-**Please note that FAST depends on Bio-Formats for full functionality.** To use FAST from the code available here, please download the latest version of [Bio-Formats for Matlab](https://www.openmicroscopy.org/bio-formats/downloads/) 
+**Please note that FAST depends on Bio-Formats for full functionality.** To use FAST from the code available here, please download the latest version of [Bio-Formats for Matlab](https://www.openmicroscopy.org/bio-formats/downloads/) and add the bioformats_package.jar file to your homePanel/bfmatlab folder. Alternatively, you can download a pre-packaged version of FAST from [the wiki](https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=setup:installation).
 
 A publication detailing the implementation and functionality of FAST is currently under preparation. In the mean time, if you find this software useful, please cite it using the DOI [![DOI](https://zenodo.org/badge/237035985.svg)](https://zenodo.org/badge/latestdoi/237035985)
