@@ -12,7 +12,7 @@ Have you struggled with automated measurement of the movement of many closely-pa
 * Integrated overlay and plotting systems, allowing rapid validation and visualisation of tracking data.
 * No need for a Matlab license - FAST is also available as a free stand-alone application.
 
-### Detailed documentation available at https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=start
+### Detailed documentation available at https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki
 
 **Please note that FAST depends on Bio-Formats for full functionality.** To use FAST from the code available here, please download the latest version of [Bio-Formats for Matlab](https://www.openmicroscopy.org/bio-formats/downloads/) and add the bioformats_package.jar file to your homePanel/bfmatlab folder. Alternatively, you can download a pre-packaged version of FAST from [the wiki](https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=setup:installation).
 
