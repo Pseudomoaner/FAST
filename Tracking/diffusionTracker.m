@@ -189,6 +189,17 @@ handles.TrackLenSlide.Max = maxT;
 handles.AllFeatRadio.Value = 0;
 handles.CentOnlyRadio.Value = 1;
 
+%Set up the axes
+handles.axes1.Box = 'on';
+handles.axes1.LineWidth = 1.5;
+handles.axes2.Box = 'on';
+handles.axes2.LineWidth = 1.5;
+handles.axes3.Box = 'on';
+handles.axes3.LineWidth = 1.5;
+handles.axes4.XTick = [];
+handles.axes4.YTick = [];
+handles.axes4.Box = 'on';
+handles.axes4.LineWidth = 1.5;
 handles.axes5.Visible = 'off';
 
 %Set up the strings for the drop down menus
@@ -388,7 +399,7 @@ end
 %Build feature matrices
 [featMats.lin,featMats.circ] = buildFeatureMatricesRedux(trackableData,featureStruct,possIdx,trackSettings.minFrame,trackSettings.maxFrame);
 
-[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.tgtDensity,trackSettings.gapWidth,false,debugSet);
+[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.gapWidth,false,0,debugSet);
 
 trackDataNames = fieldnames(trackableData);
 rawTracks = struct();
@@ -449,14 +460,10 @@ smallTrackableData.Centroid = trackableData.Centroid(trackSettings.frameA:trackS
 tmpLinkStats = linkStats;
 tmpLinkStats.linMs = tmpLinkStats.linMs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
 tmpLinkStats.circMs = tmpLinkStats.circMs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.linRs = tmpLinkStats.linRs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.circRs = tmpLinkStats.circRs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.linDs = tmpLinkStats.linDs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.circDs = tmpLinkStats.circDs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.linEs = tmpLinkStats.linEs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-tmpLinkStats.circEs = tmpLinkStats.circEs(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
+tmpLinkStats.covDfs = tmpLinkStats.covDfs(trackSettings.frameA-calcTrackSettings.minFrame+1,:,:);
+tmpLinkStats.covFs = tmpLinkStats.covFs(trackSettings.frameA-calcTrackSettings.minFrame+1,:,:);
 tmpLinkStats.trackability = tmpLinkStats.trackability(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-[Tracks,Initials,~,~,~,~,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(linSmallMats,circSmallMats,linSmallMats,circSmallMats,tmpLinkStats,trackSettings.tgtDensity,trackSettings.gapWidth,true,debugSet);
+[Tracks,Initials,~,~,~,~,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(linSmallMats,circSmallMats,linSmallMats,circSmallMats,tmpLinkStats,trackSettings.gapWidth,true,trackSettings.frameA-1,debugSet);
 
 testDiffs.accept = acceptDiffs;
 testDiffs.reject = rejectDiffs;
@@ -780,6 +787,17 @@ global linkStats
 trackSettings.tgtDensity = 10^(get(hObject,'Value'));
 handles.AdaptEdit.String = num2str(trackSettings.tgtDensity);
 
+%Recalculate link thresholds based on selected value
+linkStats.incRads = zeros(size(linkStats.covDfs,1),1);
+noFeats = size(linkStats.covDfs,2);
+
+constFac = ((12/pi)^(1/2))*(trackSettings.tgtDensity ^ (1/noFeats));
+for i = 1:size(linkStats.covDfs,1)
+    detFac = (det(squeeze(linkStats.covFs(i,:,:)))/det(squeeze(linkStats.covDfs(i,:,:)))) ^ (1/(2*noFeats));
+    gamFac = (gamma(1+noFeats/2))/(linkStats.noObj(i)-1) ^ (1/noFeats);
+    linkStats.incRads(i) = constFac*detFac*gamFac;
+end
+
 if trackSettings.testTracked == 1
     plotNormalizedStepSizes(trackSettings,testDiffs,linkStats,handles.axes2)
 end
@@ -816,6 +834,17 @@ if txtValue > handles.AdaptSlide.Max
 end
 
 handles.AdaptSlide.Value = txtValue;
+
+%Recalculate link thresholds based on selected value
+linkStats.incRads = zeros(size(linkStats.covDfs,1),1);
+noFeats = size(linkStats.covDfs,2);
+
+constFac = ((12/pi)^(1/2))*(trackSettings.tgtDensity ^ (1/noFeats));
+for i = 1:size(linkStats.covDfs,1)
+    detFac = (det(squeeze(linkStats.covFs(i,:,:)))/det(squeeze(linkStats.covDfs(i,:,:)))) ^ (1/(2*noFeats));
+    gamFac = (gamma(1+noFeats/2))/(linkStats.noObj(i)-1) ^ (1/noFeats);
+    linkStats.incRads(i) = constFac*detFac*gamFac;
+end
 
 if trackSettings.testTracked == 1
     plotNormalizedStepSizes(trackSettings,testDiffs,linkStats,handles.axes2)

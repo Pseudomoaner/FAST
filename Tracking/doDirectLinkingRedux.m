@@ -1,4 +1,4 @@
-function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,linkStats,tgtDensity,gapSize,returnSteps,debugSet)
+function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,linkStats,gapSize,returnSteps,frameOffset,debugSet)
 %DODIRECTLINKINGREDUX performs object-object linking based on minimisation
 %of the distance between sequential objects in the normalised displacement
 %space.
@@ -16,13 +16,15 @@ function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircF
 %       -linkStats: Statistics necessary for normalisation of features
 %       provided in fromLinFeatMats and fromCircFeatMats. Output from
 %       gatherLinkStats
-%       -tgtDensity: User-defined cutoff threshold to separate positive
-%       links from negative links. Negative links are not assigned.
 %       -gapSize: User-defined maximal gap (in frames) that can be bridged
 %       by the algorithm.
 %       -returnSteps: Set true to return the displacements (in the normalised
 %       feature space) of the positive and negative links. Used for
 %       plotting projections of the normalised displacement space.
+%       -frameOffset: Only really useful for test-tracking (set to 0 for
+%       all other purposes) - is an integer added to the frame index i when
+%       pulling statistics out of the contents of linkStats. Allows you to
+%       specify a single frame for analysis.
 %       -debugSet: Set true if FAST is in debug mode.
 %
 %   OUTPUTS:
@@ -50,11 +52,6 @@ function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircF
 %
 %   Author: Oliver J. Meacock (c) 2019
 
-fromLinFeatMatsCpy = fromLinFeatMats;
-fromCircFeatMatsCpy = fromCircFeatMats;
-toLinFeatMatsCpy = toLinFeatMats;
-toCircFeatMatsCpy = toCircFeatMats;
-
 %Preallocate tracks
 Tracks = cell(size(fromLinFeatMats));
 Initials = cell(size(fromLinFeatMats));
@@ -69,71 +66,91 @@ if returnSteps %If the user wants to inspect the (normalized) steps calculated d
 end
 
 %Unpack the linkStats structure (to reduce line lengths later)
-linDs = linkStats.linDs; 
-linEs = linkStats.linEs;
+covDfs = linkStats.covDfs; 
 linMs = linkStats.linMs;
-circDs = linkStats.circDs;
-circEs = linkStats.circEs;
 circMs = linkStats.circMs;
-trackability = linkStats.trackability;
-
-%Calculate the desired inclusion radius from the target density
-noFeats = size(linDs,2) + size(circDs,2);
-densities = 10.^(-trackability);
-rescale = tgtDensity./densities;
-incRads = NsphereVol2Rad(rescale,noFeats);
+incRads = linkStats.incRads;
 
 debugprogressbar([0.4;0;0],debugSet);
 
 for j = 1:gapSize
     for i = 1:length(fromLinFeatMats) - j        
         if ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
-            linFrame1 = fromLinFeatMats{i}(:,2:end)./repmat(linDs(i,:),size(fromLinFeatMats{i},1),1);
-            linFrame2 = (toLinFeatMats{i+j}(:,2:end) + repmat(sum(mean(linMs(i:i+j-1,:),1),1),size(toLinFeatMats{i+j},1),1))./repmat(linDs(i,:),size(toLinFeatMats{i+j},1),1);
-            if ~ isempty(circMs)
-                circFrame1 = fromCircFeatMats{i}(:,2:end)./repmat(circDs(i,:),size(fromCircFeatMats{i},1),1);
-                circFrame2 = (toCircFeatMats{i+j}(:,2:end) + repmat(sum(mean(circMs(i:i+j-1,:),1),1),size(toCircFeatMats{i+j},1),1))./repmat(circDs(i,:),size(toCircFeatMats{i+j},1),1);
+            linFrame1 = fromLinFeatMats{i}(:,2:end);
+            linFrame2 = toLinFeatMats{i+j}(:,2:end) + repmat(sum(linMs(i:i+j-1,:),1),size(toLinFeatMats{i+j},1),1);
+            fullLin1 = repmat(reshape(linFrame1,[size(linFrame1,1),1,size(linFrame1,2)]),[1,size(toLinFeatMats{i+j},1),1]);
+            fullLin2 = repmat(reshape(linFrame2,[1,size(linFrame2,1),size(linFrame2,2)]),[size(fromLinFeatMats{i},1),1,1]);
+            
+            if ~ isempty(circMs) %Note that buildFeatureMatricesRedux already scaled circular features between 0 and 1, so can set that as the 'seam' for the modular arithmetic
+                circFrame1 = fromCircFeatMats{i}(:,2:end);
+                circFrame2 = toCircFeatMats{i+j}(:,2:end) + repmat(sum(circMs(i:i+j-1,:),1),size(toCircFeatMats{i+j},1),1);
+                fullCirc1 = repmat(reshape(circFrame1,[size(circFrame1,1),1,size(circFrame1,2)]),[1,size(toLinFeatMats{i+j},1),1]);
+                fullCirc2 = repmat(reshape(circFrame2,[1,size(circFrame2,1),size(circFrame2,2)]),[size(fromLinFeatMats{i},1),1,1]);
             else
-                circFrame1 = zeros(size(fromCircFeatMats{i},1),1);
-                circFrame2 = zeros(size(toCircFeatMats{i+j},1),1);
+                fullCirc1 = zeros(size(fullLin1,1),size(fullLin1,2),0);
+                fullCirc2 = zeros(size(fullLin1,1),size(fullLin1,2),0);
+            end           
+            deltaF = cat(3,fullLin2-fullLin1,mod(fullCirc2-fullCirc1+0.5,1)-0.5);
+            
+            incRad = incRads(i + frameOffset); %Dynamically vary inclusion radius to keep density of target volume the same
+            [covEig,covDiag] = eig(squeeze(covDfs(i,:,:)));
+            adjCov = covEig*(covDiag^(-1/2))*covEig'; %Principal inverse square root (equivalent to covDfs^-1/2, but we need covEig for rotating back into the feature basis later so may as well write it out in full)
+            
+            %Calculate the distance matrix D twice. The first is quick and
+            %dirty, using only the variances of the features to rescale the
+            %feature vectors. This generates a candidate list over which we
+            %can apply the more accurate transformed covariance matrix to.
+            invSigs = diag(squeeze(covDfs(i,:,:))).^(-1/2); %List of standard deviations of marginal distributions
+            roughResc = deltaF.*repmat(reshape(invSigs,[1,1,size(deltaF,3)]),[size(deltaF,1),size(deltaF,2),1]);
+            roughD = sqrt(sum(roughResc.^2,3));
+            
+            %For each row, we want at least one entry to not be nan, even
+            %if outside the distance threshold - if visualising the
+            %normalised feature space, still want to see the rejected
+            %cases.
+            candMtx = roughD < 2*incRad; %Scaling factor of 2 here is arbitrary, depends on how strong you expect feature correlations to be (I'm assuming fairly weak here)
+            for ci = 1:size(candMtx,1)
+                if sum(candMtx(ci,:)) == 0
+                    [~,minInd] = min(roughD(ci,:));
+                    candMtx(ci,minInd) = true;
+                end
             end
-            incRad = incRads(i); %Dynamically vary inclusion radius to keep density of target volume the same
-            angMax = 1./circDs(i,:);
             
-            D1 = pdist2(linFrame1,linFrame2);
-            D2 = pdistCirc2(circFrame1,circFrame2,angMax);
-            
-            D = (D1.^2 + D2.^2).^0.5;
+            %Go through the candMtx matrix candidate by candidate, multiplying 
+            %candidate links by the transformed covariance matrix and
+            %inserting the final score, while making everything else NaN
+            D = nan(size(candMtx));
+            candList = find(candMtx);
+            [candR,candC] = ind2sub(size(candMtx),candList);
+            for ci = 1:size(candR,1)
+                deltaHatF = adjCov*squeeze(deltaF(candR(ci),candC(ci),:));
+                candVal = norm(deltaHatF);
+                D(candR(ci),candC(ci)) = candVal;
+            end
             
             %This is a hack to make sure the following code terminates if D is empty
             if isempty(D)
                 D = incRad*sqrt(j) + 1;
             end
             
-            %Most objects will normally be assignable to just a single object in the
-            %next frame, based on the value of incRad, or none at all. Deal
-            %with these cases first.
-            Dnan = D;
-            Dnan(D>incRad*sqrt(j)) = NaN;
-            
             %Go through each row, assigning the single available link (or
             %none at all)
             delInds1 = [];
             delInds2 = [];
             
-            nanNosDim1 = sum(~isnan(Dnan),1);
+            nanNosDim1 = sum(~isnan(D),1);
             
-            for Ind1 = 1:size(Dnan,1) %For each row of D
-                rowOpts = ~isnan(Dnan(Ind1,:));
-                if sum(rowOpts) == 1 %Maybe assign link...
+            for Ind1 = 1:size(D,1) %For each row of D
+                rowOpts = ~isnan(D(Ind1,:));
+                if sum(rowOpts) == 1 %Just one candidate for this row...
                     colNans = nanNosDim1(rowOpts);
-                    if colNans == 1 %Actually assign link
+                    if colNans == 1 %And just one candidate for this column, so legitimate candiate for accelerated assignment. 
                         Ind2 = find(rowOpts);
                         
                         frame1Loc = fromLinFeatMats{i}(Ind1,1);
                         frame2Loc = toLinFeatMats{i+j}(Ind2,1);
                         
-                        delInds1 = [delInds1;Ind1];
+                        delInds1 = [delInds1;Ind1]; %Regardless of whether or not you accept this candidate, it should be deleted from D
                         delInds2 = [delInds2;Ind2];
                         
                         %The below will only activate if 'Test Track' has been
@@ -141,26 +158,22 @@ for j = 1:gapSize
                         %frame-frame linking, which is only applicable to the
                         %whole dataset tracking step.
                         if returnSteps
-                            fromFeatsLin = fromLinFeatMats{i}(Ind1,2:end)./linDs;
-                            toFeatsLin = (toLinFeatMats{i+j}(Ind2,2:end) + linMs*j)./linDs;
-                            if ~isempty(circMs)
-                                fromFeatsCirc = fromCircFeatMats{i}(Ind1,2:end)./circDs;
-                                toFeatsCirc = (toCircFeatMats{i+j}(Ind2,2:end) + circMs*j)./circDs;
-                                
-                                rawDiff = fromFeatsCirc - toFeatsCirc;
-                                
-                                for a = 1:size(angMax,2)
-                                    rawDiff(rawDiff(:,a) < -angMax(a)/2,a) = rawDiff(rawDiff(:,a) < -angMax(a)/2,a) + angMax(a);
-                                    rawDiff(rawDiff(:,a) > angMax(a)/2,a) = rawDiff(rawDiff(:,a) > angMax(a)/2,a) - angMax(a);
-                                end
+                            singDHF = adjCov*squeeze(deltaF(Ind1,Ind2,:));
+                            
+                            if D(Ind1,Ind2) < incRad
+                                acceptDiffs = [acceptDiffs,covEig'*singDHF];
                             else
-                                rawDiff = [];
+                                rejectDiffs = [rejectDiffs,covEig'*singDHF];
                             end
-                            acceptDiffs = [acceptDiffs;fromFeatsLin-toFeatsLin,rawDiff];
                         end
-                        Tracks{i}(frame1Loc,1) = i + j;
-                        Tracks{i}(frame1Loc,2) = frame2Loc;
-                        Initials{i+j}(frame2Loc) = 0;
+                        
+                        %Accept single available link if smaller than
+                        %threshold
+                        if D(Ind1,Ind2) < incRad
+                            Tracks{i}(frame1Loc,1) = i + j;
+                            Tracks{i}(frame1Loc,2) = frame2Loc;
+                            Initials{i+j}(frame2Loc) = 0;
+                        end
                     end
                 end
             end
@@ -178,23 +191,15 @@ for j = 1:gapSize
             
             [minD,minInd] = min(D(:));
             
-            while minD < incRad*sqrt(j) %Assume 'diffusive' motion within the isotropic Gaussian feature space (displacement proportional to sqrt time).                
+            while minD < incRad*sqrt(j) %Assume 'diffusive' motion within the isotropic Gaussian feature space (displacement proportional to sqrt time).
                 %Find the minimum distance between frames at the moment
                 [Ind1,Ind2] = ind2sub(size(D),minInd);
                 frame1Loc = fromLinFeatMats{i}(Ind1,1);
                 frame2Loc = toLinFeatMats{i+j}(Ind2,1);
                 
                 if returnSteps
-                    fromFeatsLin = fromLinFeatMats{i}(Ind1,2:end)./linDs;
-                    toFeatsLin = (toLinFeatMats{i+j}(Ind2,2:end) + linMs*j)./linDs;
-                    if ~isempty(circMs)
-                        fromFeatsCirc = fromCircFeatMats{i}(Ind1,2:end)./circDs;
-                        toFeatsCirc = (toCircFeatMats{i+j}(Ind2,2:end) + circMs*j)./circDs;
-                    else
-                        fromFeatsCirc = [];
-                        toFeatsCirc = [];
-                    end
-                    acceptDiffs = [acceptDiffs;fromFeatsLin-toFeatsLin,pdistCirc2(fromFeatsCirc,toFeatsCirc,angMax)];
+                    singDHF = adjCov*squeeze(deltaF(frame1Loc,frame2Loc,:));
+                    acceptDiffs = [acceptDiffs,covEig'*singDHF];
                 end
                 
                 %Eliminate from distance matrix and feature matrices, and link cells.
@@ -218,7 +223,7 @@ for j = 1:gapSize
                 
                 [minD,minInd] = min(D(:));
                 
-                debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);cycleCount/size(D1,1)],debugSet)
+                debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);cycleCount/(size(D,1))],debugSet)
             end
             
             %Do a last sweep through the distance matrix to get all the steps that didn't quite make the cut.
@@ -231,21 +236,11 @@ for j = 1:gapSize
                         [~,minInd] = min(D(:));
                         [Ind1,Ind2] = ind2sub(size(D),minInd);
                         
-                        fromFeatsLin = fromLinFeatMats{i}(Ind1,2:end)./linDs;
-                        toFeatsLin = (toLinFeatMats{i+j}(Ind2,2:end) + linMs*j)./linDs;
-                        if ~isempty(circMs)
-                            fromFeatsCirc = fromCircFeatMats{i}(Ind1,2:end)./circDs;
-                            toFeatsCirc = (toCircFeatMats{i+j}(Ind2,2:end) + circMs*j)./circDs;
-                            rawDiff = fromFeatsCirc - toFeatsCirc;
-                            
-                            for a = 1:size(angMax,2)
-                                rawDiff(rawDiff(:,a) < -angMax(a)/2,a) = rawDiff(rawDiff(:,a) < -angMax(a)/2,a) + angMax(a);
-                                rawDiff(rawDiff(:,a) > angMax(a)/2,a) = rawDiff(rawDiff(:,a) > angMax(a)/2,a) - angMax(a);
-                            end
-                        else
-                            rawDiff = [];
-                        end
-                        rejectDiffs = [rejectDiffs;fromFeatsLin-toFeatsLin,rawDiff];
+                        frame1Loc = fromLinFeatMats{i}(Ind1,1);
+                        frame2Loc = toLinFeatMats{i+j}(Ind2,1);
+                        
+                        singDHF = adjCov*squeeze(deltaF(frame1Loc,frame2Loc,:));
+                        rejectDiffs = [rejectDiffs,covEig'*singDHF];
                         
                         %Eliminate from distance matrix and feature matrices, and link cells.
                         fromLinFeatMats{i}(Ind1,:) = [];

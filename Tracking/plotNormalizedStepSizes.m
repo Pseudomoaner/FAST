@@ -152,13 +152,11 @@ end
 xInd = find(cellfun(@(x) strcmp(x,xString),featNameSortedArray));
 yInd = find(cellfun(@(x) strcmp(x,yString),featNameSortedArray));
 
-noFeats = size(linkStats.linDs,2) + size(linkStats.circDs,2);
-densities = 10.^(-linkStats.trackability);
-rescale = trackSettings.tgtDensity./densities;
-incRads = NsphereVol2Rad(rescale,noFeats);
-
-incRad = incRads(trackSettings.frameA-trackSettings.minFrame+1);
+incRad = linkStats.incRads(trackSettings.frameA-trackSettings.minFrame+1);
 
 if ~isempty(xInd) && ~isempty(yInd)
     plotLinkDiffs(linkDiffs,linkStats,xInd,yInd,incRad,axHand)
 end
+
+axHand.Box = 'on';
+axHand.LineWidth = 1.5;

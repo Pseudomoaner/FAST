@@ -43,4 +43,7 @@ plot(axHand,[minTrackLength,minTrackLength],[0,100],'Color',[1,0,0],'LineWidth',
 axis(axHand,[xLims,yLims])
 hold(axHand,'off')
 
-legend(axHand,'Data percentage distribution','Minimum track length')
+axHand.Box = 'on';
+axHand.LineWidth = 1.5;
+
+legend(axHand,'Track length distribution','Minimum track length')

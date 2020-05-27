@@ -44,7 +44,7 @@ debugprogressbar(0.2,debugSet);
 debugprogressbar(0.4,debugSet);
 
 %Get scaling factors for scoring stage
-[linEs,circEs,linDs,circDs,linMs,circMs,trackability] = getScalingFactors(linFeatMats,circFeatMats,trackSettings.incProp,trackSettings.statsUse);
+[covDfs,covFs,linMs,circMs,trackability] = getScalingFactors(linFeatMats,circFeatMats,trackSettings.incProp,trackSettings.statsUse);
 
 debugprogressbar(0.8,debugSet);
 
@@ -52,14 +52,25 @@ debugprogressbar(0.8,debugSet);
 featMats.lin = linFeatMats;
 featMats.circ = circFeatMats;
 
-linkStats.linEs = linEs;
-linkStats.circEs = circEs;
-linkStats.linDs = linDs;
-linkStats.circDs = circDs;
+linkStats.covDfs = covDfs;
+linkStats.covFs = covFs;
 linkStats.linMs = linMs;
 linkStats.circMs = circMs;
-linkStats.linRs = linEs./(4*linDs);
-linkStats.circRs = circEs./(4*circDs);
 linkStats.trackability = trackability;
+
+%Calculate the detection thresholds
+noFeats = size(covDfs,2);
+
+linkStats.incRads = zeros(size(covDfs,1),1);
+linkStats.noObj = zeros(size(covDfs,1),1);
+
+constFac = ((12/pi)^(1/2))*(trackSettings.tgtDensity ^ (1/noFeats));
+for i = 1:size(linkStats.covDfs,1)
+    noObj = size(linFeatMats{i},1);
+    detFac = (det(squeeze(covFs(i,:,:)))/det(squeeze(covDfs(i,:,:)))) ^ (1/(2*noFeats));
+    gamFac = (gamma(1+noFeats/2))/(noObj-1) ^ (1/noFeats);
+    linkStats.incRads(i) = constFac*detFac*gamFac;
+    linkStats.noObj(i) = noObj;
+end
 
 debugprogressbar(1,debugSet);

@@ -1,7 +1,8 @@
-function [linEs,circEs,linDs,circDs,linMs,circMs,trackability] = getScalingFactors(linFeatMats,circFeatMats,includeProportion,statsUse)
-%GETSCALINGFACTORS calculates the crowding and dispersions of all features
-%in a dataset, and uses these to calculate feature weightings (SFs). It
-%also calculates the mean drift between frames.
+function [covDfs,covFs,linMs,circMs,trackability] = getScalingFactors(linFeatMats,circFeatMats,includeProportion,statsUse)
+%GETSCALINGFACTORS calculates the covariance matrices for the instantaneous
+%feature distributions (f) and displacements (Delta f) for each timepoint.
+%Also calculates the average 'drift' between frames (the mean of Delta f)
+%and the 'trackability score' (the amount of information available per object).
 %
 %   INPUTS:
 %       -linFeatMats: Cell array, containing matrices of all linear
@@ -15,11 +16,8 @@ function [linEs,circEs,linDs,circDs,linMs,circMs,trackability] = getScalingFacto
 %       used during model training, or just the centroid
 %
 %   OUTPUTS:
-%       -linEs: Extents (double the interquartile range) of the linear
-%       features.
-%       -circEs: Extents of the circular features.
-%       -linDs: Dispersals (standard deviations) of the linear features
-%       -circDs: Dispersals of the circular features
+%       -covDfs: Time-dependent covariance matrices of the feature displacements
+%       -covFs: Time-dependent covariance matrices of the initial feature distribution
 %       -linMs: Drifts (means) of the linear features
 %       -circMs: Drifts of the circular features
 %       -trackability: Trackability score for each timepoint
@@ -36,10 +34,12 @@ for i = 1:length(linFeatMats)
 end
 minFeats = min(allFeats(:,1:size(linFeatMats{1},2)-1),[],1);
 maxFeats = max(allFeats(:,1:size(linFeatMats{1},2)-1),[],1);
+noFeats = size(allFeats,2);
 
 groupedMat = [];
 
-for i = 1:length(linFeatMats) - 1
+%Construct the training dataset
+for i = 1:length(linFeatMats) - 1 %Loop over time indices
     if ~isempty(linFeatMats{i}) && ~isempty(linFeatMats{i+1})
         linFrame1 = linFeatMats{i}(:,2:end);
         linFrame2 = linFeatMats{i+1}(:,2:end);
@@ -74,22 +74,19 @@ for i = 1:length(linFeatMats) - 1
     end
 end
 
+%Extract the multivariate statistics required by later sections
 linMs = zeros(length(linFeatMats) - 1,size(linFeatMats{1},2) - 1);
 circMs = zeros(length(linFeatMats) - 1,size(circFeatMats{1},2) - 1);
-linEs = zeros(length(linFeatMats) - 1,size(linFeatMats{1},2) - 1);
-circEs = zeros(length(linFeatMats) - 1,size(circFeatMats{1},2) - 1);
-linDs = zeros(length(linFeatMats) - 1,size(linFeatMats{1},2) - 1);
-circDs = zeros(length(linFeatMats) - 1,size(circFeatMats{1},2) - 1);
+covDfs = zeros(length(linFeatMats) - 1,noFeats,noFeats);
+covFs = zeros(length(linFeatMats) - 1,noFeats,noFeats);
 trackability = zeros(length(linFeatMats) - 1,1);
 
-for i = 1:size(linFeatMats,1) - 1
+for i = 1:size(linFeatMats,1) - 1 %Loop over time again
     if size(linFeatMats{i},1) <= 1 %If no (or only a single object) in frame, don't really care about doing adjustments. Tracking should be obvious. Set measures to be very unstringent (but not e.g. Inf, as they would be if you didn't deal with this special case)
         trackability(i) = NaN;
         
-        linEs(i,:) = 100;
-        circEs(i,:) = 100;
-        linDs(i,:) = 0.0001;
-        circDs(i,:) = 0.0001;
+        covDfs(i,:,:) = eye(noFeats)*0.001;
+        covFs(i,:,:) = eye(noFeats)*100;
         linMs(i,:) = 0;
         circMs(i,:) = 0;
     else
@@ -97,50 +94,48 @@ for i = 1:size(linFeatMats,1) - 1
         subMat = groupedMat(currMatInds,:);
         sortedSubMat = sortrows(subMat,1); %Sort by distance
         
-        %Assume the n% closest objects are accurately linked - base mean adjustment values on these links.
+        %Assume the n% closest objects are accurately linked - base extracted parameters on these links.
         goodSubInds = 1:round(size(sortedSubMat,1)*includeProportion);
-        if numel(goodSubInds) < 2 %To do stats, need at least two links to be assigned when at least two objects are in frame. Can't really define a standard deviation otherwise.
+        if numel(goodSubInds) < 2 %To calculate a covariance matrix, you need at least two samples.
             goodSubInds = 1:2;
         end
         goodSubF1 = sortedSubMat(goodSubInds,2);
         goodSubF2 = sortedSubMat(goodSubInds,3);
         goodSubFrameNo = sortedSubMat(goodSubInds,4);
-        goodSubFeatureDiffs = zeros(length(goodSubInds),size(linFeatMats{1},2)-1 + size(circFeatMats{1},2)-1);
+        goodSubFeatureDiffs = zeros(length(goodSubInds),noFeats);
+        goodSubFeatures = zeros(length(goodSubInds),noFeats);
         badInds = [];
         for j = goodSubInds
+            %f (instantaneous feature positions)
+            goodSubFeatures(j,1:size(linFeatMats{1},2)-1) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
+            goodSubFeatures(j,size(linFeatMats{1},2):end) = circFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
+            
+            %Delta f (feature displacements)
             goodSubFeatureDiffs(j,1:size(linFeatMats{1},2)-1) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end) - linFeatMats{goodSubFrameNo(j)+1}(goodSubF2(j),2:end);
             circSubDiff = circFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end) - circFeatMats{goodSubFrameNo(j)+1}(goodSubF2(j),2:end);
             goodSubFeatureDiffs(j,size(linFeatMats{1},2):end) = mod(circSubDiff + 0.5,1) - 0.5;
             
-            if sum(isnan(goodSubFeatureDiffs(j,:)))>0 %If you've got any NaNs in this frame (can occur if you have badly extracted object features)
+            if sum(isnan(goodSubFeatureDiffs(j,:)))>0 %If you've got any NaNs in this frame, exclude them (can occur if you have badly extracted object features)
                 badInds = [badInds;j];
             end
         end
         goodSubFeatureDiffs(badInds,:) = [];
+        goodSubFeatures(badInds,:) = [];
         
-        frameIQRs = [iqr(linFeatMats{i}(:,2:end),1),iqr(circFeatMats{i}(:,2:end),1)];
+        %Calculate and store covariance matrices
+        covDfs(i,:,:) = cov(goodSubFeatureDiffs);
+        covFs(i,:,:) = cov(goodSubFeatures);
         
-        %It's not implausible that there's only a single object to
-        %track within frame. If so, Dispersals will be 0, which could
-        %be problematic. Use dummy values to solve.
-        if size(sortedSubMat,1) == 1
-            Dispersals = 0.01*ones(1,size(goodSubFeatureDiffs,2));
-            Extents = 0.01*ones(1,size(goodSubFeatureDiffs,2));
-        elseif size(sortedSubMat,1) > 1
-            Dispersals = std(goodSubFeatureDiffs,[],1);
-            Extents = (2*frameIQRs);
-        end
-        trackability(i) = -log10(size(sortedSubMat,1)/(prod(Extents./Dispersals)));
-        
-        linEs(i,:) = Extents(1:size(linFeatMats{1},2)-1);
-        circEs(i,:) = Extents(size(linFeatMats{1},2):end);
-        linDs(i,:) = Dispersals(1:size(linFeatMats{1},2)-1);
-        circDs(i,:) = Dispersals(size(linFeatMats{1},2):end);
-        
+        %Calculate and store mean vectors for Delta f
         linMs(i,:) = mean(goodSubFeatureDiffs(:,1:size(linFeatMats{1},2)-1),1);
         tmp = goodSubFeatureDiffs(:,size(linFeatMats{1},2):end);
         if ~isempty(tmp)
             circMs(i,:) = circ_mean(tmp,[],1);
         end
+        
+        %Calculate and store trackability score
+        detFrac = det(squeeze(covFs(i,:,:)))/det(squeeze(covDfs(i,:,:)));
+        distFac = log2(pi*exp(1)/6);
+        trackability(i) = (1/2)*log2(detFrac) - (noFeats/2)*distFac - log2(size(linFeatMats{i},1));
     end
 end

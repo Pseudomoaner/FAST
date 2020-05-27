@@ -67,6 +67,8 @@ h1.Normalization = 'pdf';
 h1.LineWidth = 1;
 ylabel(axHandBig,'PDF')
 xlabel(axHandBig,'Unnormalized step size')
+axHandBig.Box = 'on';
+axHandBig.LineWidth = 1.5;
 
 xLims = [0,prctile(unscaledDists,99.5)];
 yLims = get(axHandBig,'YLim');
@@ -77,14 +79,11 @@ axis(axHandBig,[xLims,yLims])
 legend(axHandBig,'Steps','Inclusion proportion');
 
 %Display trackability
-if numel(trackability) == 1
-    cla(axHandSmall);
-    text(axHandBig,xLims(2) - (diff(xLims)*0.35), yLims(2) - (diff(yLims)*0.17),['R = ',num2str(trackability)],'FontSize',15)
-elseif numel(trackability) > 1
-    plot(axHandSmall,1:size(trackability),trackability)
-    xlabel(axHandSmall,'Frame number','FontSize',10)
-    ylabel(axHandSmall,'Trackability','FontSize',10)
-    axis(axHandSmall,'tight')
-end
+plot(axHandSmall,1:size(trackability),trackability)
+xlabel(axHandSmall,'Frame number','FontSize',10)
+ylabel(axHandSmall,'Trackability (bits per object)','FontSize',10)
+axis(axHandSmall,'tight')
+axHandSmall.Box = 'on';
+axHandSmall.LineWidth = 1.5;
 
 hold(axHandBig,'off')

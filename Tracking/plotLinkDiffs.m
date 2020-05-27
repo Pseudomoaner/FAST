@@ -26,14 +26,13 @@ function [] = plotLinkDiffs(linkDiffs,linkStats,xInd,yInd,incRad,axHand)
 %   Author: Oliver J. Meacock (c) 2019
 
 cla(axHand)
-Rs = [linkStats.linRs,linkStats.circRs];
 
 if ~isempty(linkDiffs.accept)
-    plot(axHand,linkDiffs.accept(:,xInd),linkDiffs.accept(:,yInd),'b.');
+    plot(axHand,linkDiffs.accept(xInd,:),linkDiffs.accept(yInd,:),'b.');
 end
 hold(axHand,'on')
 if ~isempty(linkDiffs.reject)
-    plot(axHand,linkDiffs.reject(:,xInd),linkDiffs.reject(:,yInd),'r.');
+    plot(axHand,linkDiffs.reject(xInd,:),linkDiffs.reject(yInd,:),'r.');
 end
 
 drawCircle(0,0,incRad,axHand);
