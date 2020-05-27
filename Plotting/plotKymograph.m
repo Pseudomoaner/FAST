@@ -23,7 +23,7 @@ axHand.Box = 'off';
 
 %Start by figuring out how big a box you'll need to cut out from each frame, and where you should cut it out from
 plotTrack = procTracks(plotSettings.edit1); %edit1 is the track ID input
-xs = round(plotTrack.x./plotSettings.pixSize); %edit2 is the requested start frame, edit3 is the track length
+xs = round(plotTrack.x./plotSettings.pixSize);
 ys = round(plotTrack.y./plotSettings.pixSize);
 Lens = plotTrack.majorLen./plotSettings.pixSize;
 Wids = plotTrack.minorLen./plotSettings.pixSize;
@@ -46,7 +46,7 @@ exportData = cell(chanNo + 1,1);
 
 folderNames = {};
 titleNames = {};
-exportData{1} = cell(plotSettings.edit3,1);
+
 for i = 1:chanNo
     folderNames = [folderNames;['Channel_',num2str(i)]];
     titleNames = [titleNames;['Channel ',num2str(i)]];
@@ -75,8 +75,8 @@ for i = 1:size(folderNames,1)
     imgSet{i} = zeros(yWindowStage2,size(xs,1));
 end
 
-for i = 1:size(xs,1)
-    %We're going to chop out two images. The first is centred on the object and assume it can take any orientation. We rotate this and chop out the final cell from the rotated image.
+for i = 1:size(xs,1) %Loop through timepoints
+    %We're going to chop out two images. The first is centred on the object, which can take any orientation. We rotate this and chop out the final cell from the rotated image.
     xMinStage1 = max(1,xs(i) - xHalfWindowStage1);
     xUnderhang = -(xs(i) - xHalfWindowStage1 - 1);
     xMaxStage1 = min(round(plotSettings.maxX/plotSettings.pixSize),xs(i) + xHalfWindowStage1);
@@ -124,7 +124,7 @@ for i = 1:size(xs,1)
     se = strel('disk',1);
     stage2Seg = imdilate(stage2Seg,se);
     
-    for j = 1:size(folderNames,1)
+    for j = 1:size(folderNames,1) %Loop through channels
         imgFull = imread([root,filesep,folderNames{j},filesep,sprintf('Frame_%04d.tif',Frames(i)-1)]);
         stage1 = imgFull(yMinStage1:yMaxStage1,xMinStage1:xMaxStage1);
         
@@ -144,20 +144,69 @@ for i = 1:size(xs,1)
         rotStage = imrotate(stage1,90-Phis(i),'bilinear','crop');
         stage2 = rotStage(yMinStage2:yMaxStage2,xMinStage2:xMaxStage2);
         stage2(~logical(stage2Seg)) = NaN;
-        imgSet{j}(:,i) = nanmean(stage2,2);
+        
+        if plotSettings.check2 == 1 %Indicates that the user wants to normalise lengths (squish/stretch kymograph between the same limits for all timepoints).
+            profile = nanmean(stage2,2);
+            profLen = size(profile,1);
+            currLen = Lens(i);
+            maxLen = max(Lens);
+            SF = currLen/maxLen;
+            
+            currInds = (1:size(profile,1))-(profLen/2); %Indices relative to the midpoint of the cell
+            cutoutList = abs(currInds)<(currLen/2);
+            cutoutInds = currInds(cutoutList);
+            cutout = profile(cutoutList);
+            scaledInds = (min(cutoutInds)+0.01):SF:(max(cutoutInds)-0.01);
+            scaledProf = interp1(cutoutInds,cutout,scaledInds);
+            
+            %Pad scaled profile with zeros to ensure it fits within storage
+            padSize = profLen - size(scaledProf,2);
+            imgSet{j}(:,i) = [zeros(floor(padSize/2),1);scaledProf';zeros(ceil(padSize/2),1)];
+        else
+            imgSet{j}(:,i) = nanmean(stage2,2);
+        end
     end
     exportData{j} = imgSet{j};
 end
 
 subplot(axHand)
 
+%Deal with the colourmap
+cmap = colormap(plotSettings.ColourMap);
+
 for i = 1:size(folderNames,1)
     axHands(i) = subplot(size(folderNames,1),1,i);
-    imshow(imgSet{i},[],'Parent',axHands(i))
+    profLen = size(imgSet{i},1);
+    
+    if plotSettings.check2 == 1
+        lenVals = linspace(-0.5,0.5,profLen);
+        imagesc((0:size(imgSet{i},2)-1)*plotSettings.dt,lenVals,imgSet{i},'Parent',axHands(i))
+    else
+        lenVals = linspace((-profLen/2)*plotSettings.pixSize,(profLen/2)*plotSettings.pixSize,profLen);
+        imagesc((0:size(imgSet{i},2)-1)*plotSettings.dt,lenVals,imgSet{i},'Parent',axHands(i))
+        
+        %If not equating lengths, indicate the cell limits using lines
+        hold(axHands(i),'on')
+        patchline((0:size(imgSet{i},2)-1)*plotSettings.dt,plotTrack.majorLen/2,'EdgeAlpha',0.6,'EdgeColor',[1,0,0],'LineWidth',2)
+        patchline((0:size(imgSet{i},2)-1)*plotSettings.dt,-plotTrack.majorLen/2,'EdgeAlpha',0.6,'EdgeColor',[1,0,0],'LineWidth',2)
+        hold(axHands(i),'off')
+    end
+    
+    axHands(i).LineWidth = 1.5;
+    
+    colormap(axHands(i),cmap)
 end
 
 for i = 1:size(folderNames,1)
     pos = [0.33234,0.9434 - ((0.83351/size(folderNames,1))*i),0.62916,(0.83351/size(folderNames,1))-0.05];
     set(axHands(i),'Position',pos,'Units','normalized')
     title(axHands(i),titleNames{i})
+    
+    if plotSettings.check2 == 1
+        ylabel(axHands(i),{'Distance from cell midpoint'; '(normalised)'})
+    else
+        ylabel(axHands(i),'Distance from cell midpoint')
+    end
 end
+
+xlabel(axHands(end),'Time')

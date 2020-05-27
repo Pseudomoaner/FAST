@@ -469,8 +469,8 @@ switch(plotSettings.plotType)
     case 'Kymograph'
         handles.popupmenu2.Enable = 'off';
         handles.popupmenu3.Enable = 'off';
-        handles.popupmenu7.Enable = 'off';
-        handles.popupmenu7.Visible = 'off';
+        handles.popupmenu7.Enable = 'on';
+        handles.popupmenu7.Visible = 'on';
         
         handles.checkbox2.Enable = 'off';
         handles.checkbox2.Visible = 'off';
@@ -501,7 +501,7 @@ switch(plotSettings.plotType)
         handles.text14.Visible = 'off';
         handles.text15.Visible = 'off';
         handles.text16.Visible = 'off';
-        handles.text17.Visible = 'off';
+        handles.text17.Visible = 'on';
         
         if resetChecks
             trackName = fieldnames(procTracks);
@@ -510,16 +510,10 @@ switch(plotSettings.plotType)
             plotSettings.edit1 = 1;
             plotSettings.edit1Min = 1;
             plotSettings.edit1Max = size(procTracks,2);
-            handles.edit5.String = '1';
-            plotSettings.edit2 = 1;
-            plotSettings.edit2Min = 1;
-            plotSettings.edit2Max = size(procTracks(1).(trackName{1}),1);
-            handles.edit6.String = num2str(size(procTracks(1).(trackName{1}),1));
-            plotSettings.edit3 = size(procTracks(1).(trackName{1}),1);
-            plotSettings.edit3Min = 1;
-            plotSettings.edit3Max = size(procTracks(1).(trackName{1}),1) - plotSettings.edit2 + 1;
-            handles.checkbox5.Value = 0;
-            plotSettings.check4 = 0;
+            handles.checkbox3.Value = 0;
+            plotSettings.check2 = 0;
+            
+            plotSettings.ColourMap = handles.popupmenu7.String{1};
         end
 end
 
