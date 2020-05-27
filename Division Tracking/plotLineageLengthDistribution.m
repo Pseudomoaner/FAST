@@ -50,3 +50,8 @@ line([divisionSettings.minInc,divisionSettings.minInc],[0,lims(4)],'Color','r','
 
 xlabel(axHand,'Lineage size (number of tracks)')
 ylabel(axHand,'Number of lineages')
+
+axHand.Box = 'on';
+axHand.LineWidth = 1.5;
+
+legend(axHand,'Lineage size distribution','Minimum lineage size')

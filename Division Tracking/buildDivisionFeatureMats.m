@@ -42,11 +42,11 @@ for i = 1:length(featureNames)
 end
 
 tgtMat.lin = zeros(size(procTracks,2),linFeatNo+2);
-tgtMat.circ = zeros(size(procTracks,2),circFeatNo+2);
+tgtMat.circ = zeros(size(procTracks,2),circFeatNo+1);
 pred1Mat.lin = zeros(size(procTracks,2),linFeatNo+2);
-pred1Mat.circ = zeros(size(procTracks,2),circFeatNo+2);
+pred1Mat.circ = zeros(size(procTracks,2),circFeatNo+1);
 pred2Mat.lin = zeros(size(procTracks,2),linFeatNo+2);
-pred2Mat.circ = zeros(size(procTracks,2),circFeatNo+2);
+pred2Mat.circ = zeros(size(procTracks,2),circFeatNo+1);
 
 for cInd = 1:size(procTracks,2)
     %Store the track index in the first column of each matrix, and the start/end time of each track (start for target, end for predicted) in the second column
@@ -57,12 +57,10 @@ for cInd = 1:size(procTracks,2)
     pred1Mat.circ(cInd,1) = cInd;
     pred2Mat.circ(cInd,1) = cInd;
     
+    %Use time as a linear feature
     tgtMat.lin(cInd,2) = procTracks(cInd).times(1);
     pred1Mat.lin(cInd,2) = procTracks(cInd).times(end)+1;
     pred2Mat.lin(cInd,2) = procTracks(cInd).times(end)+1;
-    tgtMat.circ(cInd,2) = procTracks(cInd).times(1);
-    pred1Mat.circ(cInd,2) = procTracks(cInd).times(end)+1;
-    pred2Mat.circ(cInd,2) = procTracks(cInd).times(end)+1;
     
     linCount = 1;
     circCount = 1;
@@ -82,15 +80,15 @@ for cInd = 1:size(procTracks,2)
             
             linCount = linCount + 1;
         elseif strcmp(featureStruct.(featureNames{fInd}).StatsType,'Circular')
-            tgtMat.circ(cInd,circCount+2) = (procTracks(cInd).(featureNames{fInd})(1) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));
+            tgtMat.circ(cInd,circCount+1) = (procTracks(cInd).(featureNames{fInd})(1) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));
             
             divInputs = zeros(size(featureStruct.(featureNames{fInd}).divArguments,1),1);
             for aInd = 1:size(featureStruct.(featureNames{fInd}).divArguments,1)
                 divInputs(aInd) = procTracks(cInd).(featureStruct.(featureNames{fInd}).divArguments{aInd})(end);
             end
             
-            pred1Mat.circ(cInd,circCount+2) = (featureStruct.(featureNames{fInd}).postDivScale1(divInputs) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));;
-            pred2Mat.circ(cInd,circCount+2) = (featureStruct.(featureNames{fInd}).postDivScale2(divInputs) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));;
+            pred1Mat.circ(cInd,circCount+1) = (featureStruct.(featureNames{fInd}).postDivScale1(divInputs) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));;
+            pred2Mat.circ(cInd,circCount+1) = (featureStruct.(featureNames{fInd}).postDivScale2(divInputs) + featureStruct.(featureNames{fInd}).Range(2))/(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));;
             
             circCount = circCount + 1;
         end
@@ -98,18 +96,12 @@ for cInd = 1:size(procTracks,2)
 end
 
 %Predictors can't predict past the final frame, and targets can't be predicted from before the first. Eliminate these cases.
-pred1Mat.lin(pred1Mat.lin(:,2) == maxF,:) = [];
-pred2Mat.lin(pred2Mat.lin(:,2) == maxF,:) = [];
-pred1Mat.circ(pred1Mat.circ(:,2) == maxF,:) = [];
-pred2Mat.circ(pred2Mat.circ(:,2) == maxF,:) = [];
-tgtMat.lin(tgtMat.lin(:,2) == 1,:) = [];
-tgtMat.circ(tgtMat.circ(:,2) == 1,:) = [];
+badPred = pred1Mat.lin(:,2) == maxF;
+pred1Mat.lin(badPred,:) = [];
+pred2Mat.lin(badPred,:) = [];
+pred1Mat.circ(badPred,:) = [];
+pred2Mat.circ(badPred,:) = [];
 
-%Set circular features to range between 0 and 1. Makes future circular calculation more universal.
-circCount = 1;
-for fInd = 1:size(featureNames,1)
-    if strcmp(featureStruct.(featureNames{fInd}).StatsType,'Circular')
-        tgtMat.circ(:,circCount) = (tgtMat.circ(:,circCount) - featureStruct.(featureNames{fInd}).Range(1))./(featureStruct.(featureNames{fInd}).Range(2) - featureStruct.(featureNames{fInd}).Range(1));
-        circCount = circCount + 1;
-    end
-end
+badTgt = tgtMat.lin(:,2) == 1;
+tgtMat.lin(badTgt,:) = [];
+tgtMat.circ(badTgt,:) = [];

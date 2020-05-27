@@ -1,4 +1,4 @@
-function [linkStats,tgtMat,pred1Mat,pred2Mat,featureStruct,trackability] = gatherDivisionStats(procTracks,divisionSettings)
+function [linkStats,tgtMat,pred1Mat,pred2Mat,featureStruct] = gatherDivisionStats(procTracks,divisionSettings)
 %GATHERDIVISIONSTATS performs the model training stage of the tracking
 %algorithm of FAST. 
 %
@@ -30,14 +30,11 @@ featureStruct = prepareDivStruct(divisionSettings);
 [tgtMat,pred1Mat,pred2Mat] = buildDivisionFeatureMats(procTracks,featureStruct,divisionSettings.maxFrame);
 
 %Get scaling factors for scoring stage
-[linCs,circCs,linDs,circDs,linMs,circMs,trackability] = getDivScalingFactors(tgtMat,pred1Mat,pred2Mat,divisionSettings.incProp,divisionSettings.statsUse);
+[covDfs,covFs,linMs,circMs,trackability] = getDivScalingFactors(tgtMat,pred1Mat,pred2Mat,divisionSettings.incProp,divisionSettings.statsUse);
 
 %Pack up for export
-linkStats.linCs = linCs;
-linkStats.circCs = circCs;
-linkStats.linDs = linDs;
-linkStats.circDs = circDs;
+linkStats.trackability = trackability;
 linkStats.linMs = linMs;
 linkStats.circMs = circMs;
-linkStats.linRs = 1./(linCs.*linDs);
-linkStats.circRs = 1./(circCs.*circDs);
+linkStats.covDfs = covDfs;
+linkStats.covFs = covFs;

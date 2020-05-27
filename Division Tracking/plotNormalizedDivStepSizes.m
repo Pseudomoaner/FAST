@@ -155,3 +155,6 @@ yInd = find(cellfun(@(x) strcmp(x,yString),featNameSortedArray));
 if ~isempty(xInd) && ~isempty(yInd)
     plotLinkDiffs(linkDiffs,linkStats,xInd,yInd,divisionSettings.incRad,axHand)
 end
+
+axHand.Box = 'on';
+axHand.LineWidth = 1.5;

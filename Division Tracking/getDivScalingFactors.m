@@ -1,4 +1,4 @@
-function [linCs,circCs,linDs,circDs,linMs,circMs,trackability] = getDivScalingFactors(tgtMat,pred1Mat,pred2Mat,includeProportion,statsUse)
+function [covDfs,covFs,linMs,circMs,trackability] = getDivScalingFactors(tgtMat,pred1Mat,pred2Mat,includeProportion,statsUse)
 %GETDIVSCALINGFACTORS calculates the feature summary statistics necessary
 %for normalising the feature space, specifically for the division detection
 %module.
@@ -29,7 +29,7 @@ function [linCs,circCs,linDs,circDs,linMs,circMs,trackability] = getDivScalingFa
 %   Author: Oliver J. Meacock (c) 2019
 
 %Find the full range of values that each of the linear variables can take
-allFeats = [tgtMat.lin(:,2:end),tgtMat.circ(:,3:end);pred1Mat.lin(:,2:end),pred1Mat.circ(:,3:end);pred2Mat.lin(:,2:end),pred2Mat.circ(:,3:end)];
+allFeats = [tgtMat.lin(:,2:end),tgtMat.circ(:,2:end);pred1Mat.lin(:,2:end),pred1Mat.circ(:,2:end);pred2Mat.lin(:,2:end),pred2Mat.circ(:,2:end)];
 maxFeats = max(allFeats(:,1:size(tgtMat.lin,2)-1),[],1);
 minFeats = min(allFeats(:,1:size(tgtMat.lin,2)-1),[],1);
 
@@ -37,9 +37,9 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin)
     linFrameT = tgtMat.lin(:,2:end);
     linFrameP1 = pred1Mat.lin(:,2:end);
     linFrameP2 = pred2Mat.lin(:,2:end);
-    circFrameT = tgtMat.circ(:,3:end);
-    circFrameP1 = pred1Mat.circ(:,3:end);
-    circFrameP2 = pred2Mat.circ(:,3:end);
+    circFrameT = tgtMat.circ(:,2:end);
+    circFrameP1 = pred1Mat.circ(:,2:end);
+    circFrameP2 = pred2Mat.circ(:,2:end);
     
     %Regularize the linear data, so it varies between 0 and 1. Is an approximate way of weighting all features equally, so you can get estimates of the statistics you need to weigh them more accurately later.
     linFrameTReg = (linFrameT - repmat(minFeats,size(linFrameT,1),1))./(repmat(maxFeats,size(linFrameT,1),1) - repmat(minFeats,size(linFrameT,1),1));
@@ -62,7 +62,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin)
     %Some of these will correspond to predictation and targets at the same time point. That makes no sense - you can't be in both a pre and post-division state at once - set these comparisons to be infinitely large.
     TT = repmat(tgtMat.lin(:,2),1,size(pred1Mat.lin,1));
     TP = repmat(pred1Mat.lin(:,2)',size(tgtMat.lin,1),1);
-    sameT = TT == TP;
+    sameT = (TT - 1) == TP;
     
     D1(sameT) = Inf;
     D2(sameT) = Inf;
@@ -88,26 +88,22 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin)
     goodT2 = sorted2Mat(goodInds2,2);
     goodP2 = sorted2Mat(goodInds2,3);
     
+    uniqueTgts = union(goodT1,goodT2);
+    
+    %Find the list of features
+    goodFeatures = [tgtMat.lin(uniqueTgts,2:end),tgtMat.circ(uniqueTgts,2:end)];
+    
     %Find the featurewise differences between 'correct' links.
     goodFeatureDiffs1 = tgtMat.lin(goodT1,2:end) - pred1Mat.lin(goodP1,2:end);
     goodFeatureDiffs2 = tgtMat.lin(goodT2,2:end) - pred2Mat.lin(goodP2,2:end);
-    circ1 = tgtMat.circ(goodT1,3:end) - pred1Mat.circ(goodP1,3:end); %3:end because you don't want to count time twice.
-    circ2 = tgtMat.circ(goodT2,3:end) - pred2Mat.circ(goodP2,3:end);
+    circ1 = tgtMat.circ(goodT1,2:end) - pred1Mat.circ(goodP1,2:end);
+    circ2 = tgtMat.circ(goodT2,2:end) - pred2Mat.circ(goodP2,2:end);
     goodFeatureDiffs1 = [goodFeatureDiffs1,mod(circ1 + 0.5,1) - 0.5];
     goodFeatureDiffs2 = [goodFeatureDiffs2,mod(circ2 + 0.5,1) - 0.5];
     goodFeatureDiffs = [goodFeatureDiffs1;goodFeatureDiffs2];
     
-    %Dispersals are the standard deviations of each of these features.
-    Dispersals = std(goodFeatureDiffs,1);
-    %Crowdings are the density of objects within each feature's range
-    Crowdings = ((size(sorted1Mat,1) + size(sorted2Mat,1)))./(2*iqr(allFeats,1));
-    %Lastly calculate trackability
-    trackability = (size(sorted1Mat,1) + size(sorted2Mat,1))*prod(Dispersals./(2*iqr(allFeats,1)));
-    
-    linCs = Crowdings(1:size(tgtMat.lin,2)-1);
-    circCs = Crowdings(size(tgtMat.lin,2):end);
-    linDs = Dispersals(1:size(tgtMat.lin,2)-1);
-    circDs = Dispersals(size(tgtMat.lin,2):end);
+    covFs = cov(goodFeatures);
+    covDfs = cov(goodFeatureDiffs);
     
     %MFs are the mean displacements from predicted for each of these link differences.
     linMs = mean(goodFeatureDiffs(:,1:size(tgtMat.lin,2)-1),1);
@@ -117,11 +113,15 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin)
     else
         circMs = [];
     end
+    
+    %Calculate and store trackability score
+    detFrac = det(covFs)/det(covDfs);
+    distFac = log2(pi*exp(1)/6);
+    trackability = (1/2)*log2(detFrac) - (size(goodFeatures,2)/2)*distFac - log2(size(linFrameT,1)/2);
 else
     linMs = [];
     circMs = [];
-    linCs = [];
-    circCs = [];
-    linDs = [];
-    circDs = [];
+    covDfs = [];
+    covFs = [];
+    trackability = [];
 end

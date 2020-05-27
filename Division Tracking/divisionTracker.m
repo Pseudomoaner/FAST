@@ -191,6 +191,19 @@ handles.minEdit.String = num2str(divisionSettings.minInc);
 handles.radiobutton1.Value = 0;
 handles.radiobutton2.Value = 1;
 
+%Set up the axes
+handles.axes1.Box = 'on';
+handles.axes1.LineWidth = 1.5;
+handles.axes2.Box = 'on';
+handles.axes2.LineWidth = 1.5;
+handles.axes3.Box = 'on';
+handles.axes3.LineWidth = 1.5;
+handles.axes4.XTick = [];
+handles.axes4.YTick = [];
+handles.axes4.Box = 'on';
+handles.axes4.LineWidth = 1.5;
+handles.axes5.Visible = 'off';
+
 %Set up the strings for the drop down menus
 [strArrX,strArrY] = getDivPopupStrings(divisionSettings);
 handles.popupmenu1.String = strArrX;
@@ -299,9 +312,8 @@ global pred2Mat
 global featureStruct
 global tgtMat
 global procTracks
-global trackability
 
-[linkStats,tgtMat,pred1Mat,pred2Mat,featureStruct,trackability] = gatherDivisionStats(procTracks,divisionSettings);
+[linkStats,tgtMat,pred1Mat,pred2Mat,featureStruct] = gatherDivisionStats(procTracks,divisionSettings);
 
 %Set up the strings for the drop down menus
 [strArrX,strArrY] = getDivPopupStrings(divisionSettings);
@@ -319,14 +331,15 @@ divisionSettings.tracked = 0;
 handles.pushbutton4.Enable = 'on';
 
 %Set a default value for the inclusion radius (and the maximum value, for the slider)
-Rs = [linkStats.linRs,linkStats.circRs];
-handles.ThreshSlide.Value = 3*max(Rs);
-handles.ThreshSlide.Max = 10*max(Rs);
-handles.ThreshEdit.String = num2str(3*max(Rs));
-divisionSettings.incRad = 3*max(Rs);
+%Note - don't need to make adaptive, as not time dependent rescaling. So
+%just use a simple threshold (rather than mucking around with hyperspheres)
+handles.ThreshSlide.Value = 3;
+handles.ThreshSlide.Max = 10;
+handles.ThreshEdit.String = '3';
+divisionSettings.incRad = 3;
 
 %Do the plotting for the GUI - axes 1
-plotUnnormalizedDivStepSizes(tgtMat,pred1Mat,pred2Mat,divisionSettings.statsUse,divisionSettings.incProp,trackability,handles.axes1)
+plotUnnormalizedDivStepSizes(tgtMat,pred1Mat,pred2Mat,divisionSettings.statsUse,divisionSettings.incProp,linkStats.trackability,handles.axes1)
 
 %Clear the axes for the other figures (no longer accurate with new calculated statistics)
 cla(handles.axes2)
