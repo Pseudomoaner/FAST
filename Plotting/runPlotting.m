@@ -74,6 +74,8 @@ switch plotSettings.plotType
         plotExport = plotTimecourse(plotSubdivisions,plotSettings,plotGraphics,axHand);
     case 'Histograms'
         plotExport = plotTrackHists(plotSubdivisions,plotSettings,plotGraphics,axHand);
+    case 'Phase space'
+        plotExport = plotPhaseSpace(plotSubdivisions,plotSettings,plotGraphics,axHand);
     case 'Joint distribution'
         plotExport = plotJointDistribution(plotSubdivisions,plotSettings,plotGraphics,axHand);
     case '2D histogram'

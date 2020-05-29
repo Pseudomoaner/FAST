@@ -27,7 +27,7 @@ if isfield(tracks,'x') && isfield(tracks,'y') && ~plotSettings.pseudoTracks
     plotTypePopups = [plotTypePopups;'RMSD'];
 end
 if ~plotSettings.pseudoTracks
-    plotTypePopups = [plotTypePopups;'Timecourse'];
+    plotTypePopups = [plotTypePopups;'Timecourse';'Phase space'];
 end
 if size(trackNames,1) >= 2
     plotTypePopups = [plotTypePopups;'Joint distribution';'2D histogram'];

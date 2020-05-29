@@ -146,6 +146,40 @@ switch(plotSettings.plotType)
             handles.checkbox4.Value = 0;
             plotSettings.check3 = 0;
         end
+    case 'Phase space'
+        handles.popupmenu2.Enable = 'on';
+        handles.popupmenu3.Enable = 'on';
+        handles.popupmenu7.Enable = 'off';
+        handles.popupmenu7.Visible = 'off';
+        
+        handles.checkbox2.Enable = 'off';
+        handles.checkbox2.Visible = 'off';
+        handles.checkbox3.Enable = 'off';
+        handles.checkbox3.Visible = 'off';
+        handles.checkbox4.Enable = 'off';
+        handles.checkbox4.Visible = 'off';
+        handles.checkbox5.Enable = 'off';
+        handles.checkbox5.Visible = 'off';
+        handles.checkbox6.Enable = 'off';
+        handles.checkbox6.Visible = 'off';
+        
+        %Setup text entry boxes
+        handles.edit4.Enable = 'off';
+        handles.edit5.Enable = 'off';
+        handles.edit6.Enable = 'off';
+        handles.edit7.Enable = 'off';
+        handles.edit8.Enable = 'off';
+        handles.edit4.Visible = 'off';
+        handles.edit5.Visible = 'off';
+        handles.edit6.Visible = 'off';
+        handles.edit7.Visible = 'off';
+        handles.edit8.Visible = 'off';
+        handles.text12.Visible = 'off';
+        handles.text13.Visible = 'off';
+        handles.text14.Visible = 'off';
+        handles.text15.Visible = 'off';
+        handles.text16.Visible = 'off';
+        handles.text17.Visible = 'off';
     case 'RMSD'
         handles.popupmenu2.Enable = 'off';
         handles.popupmenu3.Enable = 'off';        
