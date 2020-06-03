@@ -54,8 +54,13 @@ for cInd = 1:length(data)
                 else
                     thisDat = data(cInd).(overlaySettings.data)(tInd);
                 end
-                thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
-                if thisInd == 0
+                
+                if ~isnan(thisDat) %Always a small risk a fragment with NaN data has crept in...
+                    thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
+                    if thisInd == 0
+                        thisInd = 1;
+                    end
+                else
                     thisInd = 1;
                 end
                 thisCol = cmap(thisInd,:);
