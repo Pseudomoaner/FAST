@@ -1,4 +1,4 @@
-function plotExport = plotTrackHists(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotTrackHists(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTTRACKHISTS generates a histogram (linear or circular) of the
 %currently selected track-associated variable, for the currently selected
 %tracks.
@@ -150,7 +150,7 @@ else
     for i = 1:size(h,2)
         h(i).BinWidth = maxBinWidth;
     end
-    xlabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
+    xlabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
     ylabel(axHand,'PDF','FontSize',15)
 end
 

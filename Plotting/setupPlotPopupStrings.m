@@ -72,7 +72,7 @@ if isempty(minLenInd)
 else
     for i = 1:size(trackNames,1)
         if size(tracks(minLenInd).(trackNames{i}),1) >= minLen
-            dataPopups = [dataPopups;trackNames{i}];
+            dataPopups = [dataPopups;switchVarName(root,trackNames{i},'ptName','hName')];
         end
     end
 end

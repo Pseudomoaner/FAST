@@ -69,21 +69,21 @@ end
 
 switch plotSettings.plotType
     case 'RMSD'
-        plotExport = plotRMSD(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotRMSD(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Timecourse'
-        plotExport = plotTimecourse(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotTimecourse(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Histograms'
-        plotExport = plotTrackHists(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotTrackHists(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Phase space'
-        plotExport = plotPhaseSpace(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotPhaseSpace(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Joint distribution'
-        plotExport = plotJointDistribution(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotJointDistribution(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case '2D histogram'
-        plotExport = plot2DHistogram(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plot2DHistogram(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Event centred average'
-        plotExport = plotEventAverage(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotEventAverage(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Division centred average'
-        plotExport = plotDivisionAverage(plotSubdivisions,plotSettings,plotGraphics,axHand);
+        plotExport = plotDivisionAverage(plotSubdivisions,plotSettings,plotGraphics,root,axHand);
     case 'Choose plot type'
         plotExport = [];
     case 'Cartouche'

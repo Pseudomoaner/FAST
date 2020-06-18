@@ -1,4 +1,4 @@
-function plotExport = plotTimecourse(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotTimecourse(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTTIMECOURSE plots the currently selected track-associated variable over
 %time, either averaging by timepoint or showing all traces separately
 %
@@ -98,6 +98,9 @@ end
 if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
-xlabel(axHand,'Time','FontSize',15)
-ylabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
+
+[tSym,~] = getDimensionalSymbols(root);
+
+xlabel(axHand,['Time / ',tSym{1}],'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
 hold(axHand,'off')

@@ -1,4 +1,4 @@
-function plotExport = plotPhaseSpace(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotPhaseSpace(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTPHASESPACE plots tracks, using arbitrary track-associated variables as
 %the axes in place of spatial coordinates. 
 %
@@ -73,6 +73,6 @@ end
 if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
-xlabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
-ylabel(axHand,plotSettings.data2,'FontSize',15,'Interpreter','none')
+xlabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data2,'ptName','hsName'),'FontSize',15)
 hold(axHand,'off')

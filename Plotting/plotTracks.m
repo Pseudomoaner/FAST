@@ -83,8 +83,8 @@ handles.popupmenu2.String = dataPopups;
 handles.popupmenu3.String = dataPopups;
 
 plotSettings.plotType = handles.popupmenu1.String{handles.popupmenu1.Value};
-plotSettings.data1 = handles.popupmenu2.String{handles.popupmenu2.Value};
-plotSettings.data2 = handles.popupmenu3.String{handles.popupmenu3.Value};
+plotSettings.data1 = switchVarName(root,handles.popupmenu2.String{handles.popupmenu2.Value},'hName','ptName');
+plotSettings.data2 = switchVarName(root,handles.popupmenu3.String{handles.popupmenu3.Value},'hName','ptName');
 plotSettings.ColourMap = handles.popupmenu7.String{handles.popupmenu7.Value};
 
 %Setup option boxes visibilities, titles etc.
@@ -167,7 +167,7 @@ global procTracks
 global plotExport
 global root
 
-plotSettings.data1 = handles.popupmenu2.String{handles.popupmenu2.Value};
+plotSettings.data1 = switchVarName(root,handles.popupmenu2.String{handles.popupmenu2.Value},'hName','ptName');
 
 if strcmp(plotSettings.plotType,'2D histogram')
     %Get the range of the selected field
@@ -218,7 +218,7 @@ global procTracks
 global plotExport
 global root
 
-plotSettings.data2 = handles.popupmenu3.String{handles.popupmenu3.Value};
+plotSettings.data2 = switchVarName(root,handles.popupmenu3.String{handles.popupmenu3.Value},'hName','ptName');
 
 if strcmp(plotSettings.plotType,'2D histogram')
     %Get the range of the selected field

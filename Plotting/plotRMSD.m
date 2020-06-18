@@ -1,4 +1,4 @@
-function plotExport = plotRMSD(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotRMSD(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTRMSD generates and plots the Root Mean Square Displacement (RMSD) for
 %the input tracks.
 %
@@ -115,6 +115,9 @@ end
 if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
-xlabel(axHand,'Lag time','FontSize',15)
-ylabel(axHand,'RMSD','FontSize',15)
+
+[tSym,xSym] = getDimensionalSymbols(root);
+
+xlabel(axHand,['Lag time / ', tSym{1}],'FontSize',15)
+ylabel(axHand,['RMSD / ', xSym{1}],'FontSize',15)
 hold(axHand,'off')

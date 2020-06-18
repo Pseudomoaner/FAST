@@ -1,4 +1,4 @@
-function plotExport = plotJointDistribution(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotJointDistribution(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTJOINTDISTRIBUTION generates a scatter plot of two selected
 %track-associated measures. Uses the whole-track average - to treat each
 %timepoint within each track individually, use plot2dHistogram instead.
@@ -82,6 +82,6 @@ end
 if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
-xlabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
-ylabel(axHand,plotSettings.data2,'FontSize',15,'Interpreter','none')
+xlabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data2,'ptName','hsName'),'FontSize',15)
 hold(axHand,'off')

@@ -1,4 +1,4 @@
-function plotExport = plotEventAverage(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plotEventAverage(plotSubs,plotSettings,pGs,root,axHand)
 %PLOTEVENTAVERAGE plots the average of many different tracks, centred upon
 %a user-specified event. Events should be stored within the 'event' field
 %of the procTracks structure.
@@ -110,9 +110,11 @@ for i = 1:size(plotSubs,1)
     
 end
 
+[tSym,~] = getDimensionalSymbols(root);
+
 if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
-xlabel(axHand,'Time relative to event','FontSize',15)
-ylabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
+xlabel(axHand,['Time relative to event / ',tSym{1}],'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
 hold(axHand,'off')

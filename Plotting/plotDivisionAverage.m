@@ -1,4 +1,4 @@
-function plotExport = plotDivisionAverage(plotSubdivisions,plotSettings,pGs,axHand)
+function plotExport = plotDivisionAverage(plotSubdivisions,plotSettings,pGs,root,axHand)
 %PLOTDIVISIONAVERAGE plots the average of many different tracks, centred
 %automatically detected division events. Divisions are detected using the
 %division detection module.
@@ -122,6 +122,8 @@ if plotSettings.legendSwitch == 1
     legend(legH,legNames)
 end
 
-xlabel(axHand,'Time relative to division','FontSize',15)
-ylabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
+[tSym,~] = getDimensionalSymbols(root);
+
+xlabel(axHand,['Time relative to division / ',tSym{1}],'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
 hold(axHand,'off')

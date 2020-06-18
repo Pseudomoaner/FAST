@@ -1,4 +1,4 @@
-function plotExport = plot2DHistogram(plotSubs,plotSettings,pGs,axHand)
+function plotExport = plot2DHistogram(plotSubs,plotSettings,pGs,root,axHand)
 %PLOT2DHISTOGRAM plots a 2D histogram (heatmap) of the specified data.
 %
 %Options are:
@@ -83,7 +83,7 @@ for i = 1:size(plotSubs,1)
     end
 end
 
-xlabel(axHand,plotSettings.data1,'FontSize',15,'Interpreter','none')
-ylabel(axHand,plotSettings.data2,'FontSize',15,'Interpreter','none')
+xlabel(axHand,switchVarName(root,plotSettings.data1,'ptName','hsName'),'FontSize',15)
+ylabel(axHand,switchVarName(root,plotSettings.data2,'ptName','hsName'),'FontSize',15)
 axis(axHand,'tight')
 hold(axHand,'off')

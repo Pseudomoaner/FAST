@@ -197,6 +197,8 @@ for i = 1:size(folderNames,1)
     colormap(axHands(i),cmap)
 end
 
+[tSym,xSym] = getDimensionalSymbols(root);
+
 for i = 1:size(folderNames,1)
     pos = [0.33234,0.9434 - ((0.83351/size(folderNames,1))*i),0.62916,(0.83351/size(folderNames,1))-0.05];
     set(axHands(i),'Position',pos,'Units','normalized')
@@ -205,8 +207,8 @@ for i = 1:size(folderNames,1)
     if plotSettings.check2 == 1
         ylabel(axHands(i),{'Distance from cell midpoint'; '(normalised)'})
     else
-        ylabel(axHands(i),'Distance from cell midpoint')
+        ylabel(axHands(i),['Distance from cell midpoint / ', xSym{1}])
     end
 end
 
-xlabel(axHands(end),'Time')
+xlabel(axHands(end),['Time / ', tSym{1}])
