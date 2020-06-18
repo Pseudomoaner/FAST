@@ -121,7 +121,9 @@ handles.DataPopup.String = dataPopups;
 overlaySettings.underlay = handles.UnderlayPopup.String{handles.UnderlayPopup.Value};
 overlaySettings.type = handles.OverlayPopup.String{handles.OverlayPopup.Value};
 overlaySettings.info = handles.InfoPopup.String{handles.InfoPopup.Value};
-overlaySettings.data = handles.DataPopup.String{handles.DataPopup.Value};
+
+oriName = handles.DataPopup.String{handles.DataPopup.Value};
+overlaySettings.data = switchVarName(root,oriName,'hName','ptName');
 
 plotOverlay(procTracks,root,overlaySettings,colourmap,handles.axes1,true,debugSet)
 
@@ -259,7 +261,7 @@ global root
 global colourmap
 global debugSet
 
-overlaySettings.data = handles.DataPopup.String{handles.DataPopup.Value};
+overlaySettings.data = switchVarName(root,handles.DataPopup.String{handles.DataPopup.Value},'hName','ptName');
 
 plotOverlay(procTracks,root,overlaySettings,colourmap,handles.axes1,true,debugSet)
 

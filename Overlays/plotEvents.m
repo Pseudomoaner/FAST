@@ -21,6 +21,7 @@ for cInd = 1:size(tracks,2)
     tInd = find(tracks(cInd).times == f);
     if ~isempty(tInd)
         innerRad = round(tracks(cInd).majorLen(tInd)/(overlaySettings.pixSize*2)) + innerOffset;
+        tracks(cInd).event(tInd)
         switch tracks(cInd).event(tInd)
             case 1
                 makeRing(axHand,tracks(cInd).x(tInd)/overlaySettings.pixSize,tracks(cInd).y(tInd)/overlaySettings.pixSize,innerRad,innerRad + ringThick,[1,0,0]);

@@ -59,7 +59,6 @@ end
 infoPopups = {'Raw','Track IDs','Data'};
 if isfield(tracks,'D1')
     infoPopups = [infoPopups,'Lineage'];
-    
 end
 
 %Data overlay names
@@ -93,7 +92,7 @@ if isempty(minLenInd)
 else
     for i = 1:size(trackNames,1)
         if size(tracks(minLenInd).(trackNames{i}),1) >= minLen %Ensures that any whole-track measures (e.g. average speed) are discounted.
-            dataPopups = [dataPopups;trackNames{i}];
+            dataPopups = [dataPopups;switchVarName(root,trackNames{i},'ptName','hName')];
         end
     end
 end

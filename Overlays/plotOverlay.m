@@ -60,7 +60,7 @@ axLims = axis(axHand);
 if strcmp(overlaySettings.info,'Data')
     cb = colorbar(axHand);
     colormap(axHand,overlaySettings.cmapName)
-    cb.Label.String = overlaySettings.data;
+    cb.Label.String = switchVarName(root,overlaySettings.data,'ptName','hsName');
     caxis(axHand,[minData,maxData]);
     cb.Limits = [minData,maxData];
     cb.FontSize = 15;
@@ -121,9 +121,14 @@ switch overlaySettings.type
         end
 end
 
+%Below should be commented out - only used if you need to plot object ID
+%rather than track ID during writeIDonImg during debugging/demoing.
+%load(fullfile(root,'Tracks.mat'),'fromMappings')
+
 %Do ID overlay (if selected)
 if overlaySettings.IDshow == 1
     writeIDonImg(tracks,overlaySettings,axHand)
+    %writeIDonImg(tracks,fromMappings,overlaySettings,axHand)
 end
 
 %Do event overlay (if selected)
