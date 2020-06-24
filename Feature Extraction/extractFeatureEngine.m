@@ -88,13 +88,24 @@ end
 
 debugprogressbar(0,debugSet);
 
-for i = 1:maxT
+%Check whether a custom feature extraction script exists
+customise =  exist(fullfile(root,'customFeats.m'),'file');
+if customise
+    addpath(fullfile(root));
+    noSFs = size(customFeats([],[],[]),1);
     
+    for s = 1:noSFs
+        eval(['SpareFeats', num2str(s), ' = cell(maxT,1);'])
+    end
+end
+
+%Loop over frames
+for i = 1:maxT    
     %Load the segmentation and (if needed) the original channel frames.
     segFrame = imread([segmentRoot,sprintf('Frame_%04d.tif',i-1)]);
     segFrame = bwlabeln(segFrame,8);
     
-    if numel(featSettings.MeanInc) > 0 || numel(featSettings.StdInc) > 0
+    if numel(featSettings.MeanInc) > 0 || numel(featSettings.StdInc) > 0 || customise
         chanFrames = cell(featSettings.noChannels,1);
         
         for chan = 1:featSettings.noChannels
@@ -102,12 +113,15 @@ for i = 1:maxT
             chanFrame = double(imread([chanRoot,sprintf('Frame_%04d.tif',i-1)]));
             chanFrames{chan,1} = chanFrame;
         end
-        
-        %Initialize feature storage
-        ChannelMeans{i} = zeros(max(segFrame(:)),numel(featSettings.MeanInc));
-        ChannelStds{i} = zeros(max(segFrame(:)),numel(featSettings.StdInc));
     end
     
+    %Storage initialisation for this frame
+    if numel(featSettings.MeanInc) > 0
+        ChannelMeans{i} = zeros(max(segFrame(:)),numel(featSettings.MeanInc));
+    end
+    if numel(featSettings.StdInc) > 0
+        ChannelStds{i} = zeros(max(segFrame(:)),numel(featSettings.StdInc));
+    end
     if featSettings.Centroid == 1
         Centroids{i} = zeros(max(segFrame(:)),2);
     end
@@ -123,13 +137,19 @@ for i = 1:maxT
     if featSettings.Area == 1
         Areas{i} = zeros(max(segFrame(:)),1);
     end
+    if customise
+        for s = 1:noSFs
+            eval(['SpareFeats', num2str(s), '{i} = zeros(max(segFrame(:)),1);'])
+        end
+    end
     
+    %Loop through each segmented object in the frame
     segMax = max(segFrame(:));
     stats = regionprops(segFrame,'Centroid','Area','BoundingBox'); %You're almost certainly going to need the bounding box - may as well get the centroid while you're at it, even if it goes unused.
     for Seg = 1:segMax
         %Measure properties of each cell
         oneCell = segFrame == Seg;
-        if sum(oneCell(:)) < 20 %Generally, feature detection is going to be pretty terrible if object is too small relative to the pixel area. This is a fairly arbitrary threshold, which in principle should be guarunteed by sensible segmentation parameters anyway.
+        if sum(oneCell(:)) < 20 %Generally, feature detection is going to be pretty terrible if object is too small relative to the pixel area. This is a fairly arbitrary threshold, which in principle should be guaranteed by sensible segmentation parameters anyway.
             if featSettings.Centroid == 1
                 Centroids{i}(Seg,:) = stats(Seg).Centroid * featSettings.pixSize;
             end
@@ -146,18 +166,23 @@ for i = 1:maxT
                 Orientations{i}(Seg) = NaN;
             end
             if numel(featSettings.MeanInc) > 0
-                %Insert measured cell properties into appropriate storage locations
                 ChannelMeans{i}(Seg,:) = nan(1,numel(featSettings.MeanInc));
             end
             if numel(featSettings.StdInc) > 0
                 ChannelStds{i}(Seg,:) = nan(1,numel(featSettings.StdInc));
+            end
+            if customise
+                for s = 1:noSFs
+                    eval(['SpareFeats', num2str(s), '{i}(Seg) = NaN;'])
+                end
             end
         else
             BB = stats(Seg).BoundingBox;
             BB = round(BB);
             SubSeg = oneCell(BB(2):BB(2)+BB(4)-1,BB(1):BB(1)+BB(3)-1);
             
-            if featSettings.Orient == 1 || featSettings.Length == 1 || featSettings.Width == 1 %The rotation operation takes the most time, so only do it if absolutely necessary.
+            %The rotation operation takes the most time, so only do it if absolutely necessary.
+            if featSettings.Orient == 1 || featSettings.Length == 1 || featSettings.Width == 1
                 switch featSettings.morphologyAlg
                     case 1
                         [Orient,Length,Width] = rotationMeasures(SubSeg);
@@ -167,18 +192,28 @@ for i = 1:maxT
                 Orient = -Orient;
             end
             
-            if numel(featSettings.MeanInc) > 0 || numel(featSettings.StdInc) > 0
+            %Get features (and subimages) associated with fluorescence
+            if numel(featSettings.MeanInc) > 0 || numel(featSettings.StdInc) > 0 || customise
                 
                 cellIntensities = zeros(1,numel(featSettings.MeanInc));
                 cellStds = zeros(1,numel(featSettings.StdInc));
                 
-                usedChans = union(featSettings.StdInc,featSettings.MeanInc);
+                if customise
+                    usedChans = 1:featSettings.noChannels;
+                    chanStore = cell(featSettings.noChannels,1);
+                else
+                    usedChans = union(featSettings.StdInc,featSettings.MeanInc)';
+                end
                 
                 meanInd = 1;
                 stdInd = 1;
-                for chan = usedChans'
+                for chan = usedChans
                     SubImg = chanFrames{chan,1}(BB(2):BB(2)+BB(4)-1,BB(1):BB(1)+BB(3)-1);
                     imgInts = SubImg(logical(SubSeg));
+                    
+                    if customise
+                        chanStore{chan} = SubImg;
+                    end
                     
                     if ~isempty(find(featSettings.MeanInc == chan,1))
                         cellIntensities(1,meanInd) = mean(imgInts);
@@ -211,6 +246,12 @@ for i = 1:maxT
             if featSettings.Orient == 1
                 Orientations{i}(Seg) = Orient;
             end
+            if customise
+                SFvec = customFeats(SubSeg,chanStore,featSettings.pixSize);
+                for s = 1:noSFs
+                    eval(['SpareFeats', num2str(s), '{i}(Seg) = SFvec(s);'])
+                end
+            end
         end
     end
     debugprogressbar(i/maxT,debugSet)
@@ -238,6 +279,11 @@ if numel(featSettings.MeanInc) > 0
 end
 if numel(featSettings.StdInc) > 0
     trackableData.ChannelStd = ChannelStds;
+end
+if customise
+    for s = 1:noSFs
+        eval(['trackableData.SpareFeat', num2str(s), ' = SpareFeats', num2str(s), ';'])
+    end
 end
 
 save(cellFeaturesPath,'-v7.3','maxT','trackableData','featSettings')
@@ -277,6 +323,9 @@ if size(trackableData.(featNames{1}),1) == 1
                     fieldStd = ['channel_',num2str(featSettings.StdInc(chan)),'_std'];
                     procTracks(i).(fieldStd) = ChannelStds{1}(i,chan);
                 end
+            end
+            if customise
+                eval(['procTracks(i).spareFeat', num2str(s),' = SpareFeats', num2str(s), '{1}(i)'])
             end
             procTracks(i).times = 1;
         end
