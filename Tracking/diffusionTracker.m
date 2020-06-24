@@ -133,21 +133,21 @@ else
 end
 
 if isfield(trackableData,'SpareFeat2')
-    handles.SF1Check.Enable = 'on';
+    handles.SF2Check.Enable = 'on';
     trackSettings.SpareFeat2 = 0;
 else
     trackSettings.SpareFeat2 = 0;
 end
 
 if isfield(trackableData,'SpareFeat3')
-    handles.SF1Check.Enable = 'on';
+    handles.SF3Check.Enable = 'on';
     trackSettings.SpareFeat3 = 0;
 else
     trackSettings.SpareFeat3 = 0;
 end
     
 if isfield(trackableData,'SpareFeat4')
-    handles.SF1Check.Enable = 'on';
+    handles.SF4Check.Enable = 'on';
     trackSettings.SpareFeat4 = 0;
 else
     trackSettings.SpareFeat4 = 0;
