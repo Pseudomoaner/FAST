@@ -150,24 +150,24 @@ else
 end
 
 if isfield(procTracks,'sparefeat2')
-    handles.checkbox8.Enable = 'on';
-    handles.checkbox8.Value = 1.0;
+    handles.checkbox10.Enable = 'on';
+    handles.checkbox10.Value = 1.0;
     divisionSettings.SpareFeat2 = 1;
 else
     divisionSettings.SpareFeat2 = 0;
 end
 
 if isfield(procTracks,'sparefeat3')
-    handles.checkbox8.Enable = 'on';
-    handles.checkbox8.Value = 1.0;
+    handles.checkbox11.Enable = 'on';
+    handles.checkbox11.Value = 1.0;
     divisionSettings.SpareFeat3 = 1;
 else
     divisionSettings.SpareFeat3 = 0;
 end
     
 if isfield(procTracks,'sparefeat4')
-    handles.checkbox8.Enable = 'on';
-    handles.checkbox8.Value = 1.0;
+    handles.checkbox12.Enable = 'on';
+    handles.checkbox12.Value = 1.0;
     divisionSettings.SpareFeat4 = 1;
 else
     divisionSettings.SpareFeat4 = 0;
