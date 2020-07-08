@@ -836,14 +836,16 @@ end
 handles.AdaptSlide.Value = txtValue;
 
 %Recalculate link thresholds based on selected value
-linkStats.incRads = zeros(size(linkStats.covDfs,1),1);
-noFeats = size(linkStats.covDfs,2);
-
-constFac = ((12/pi)^(1/2))*(trackSettings.tgtDensity ^ (1/noFeats));
-for i = 1:size(linkStats.covDfs,1)
-    detFac = (det(squeeze(linkStats.covFs(i,:,:)))/det(squeeze(linkStats.covDfs(i,:,:)))) ^ (1/(2*noFeats));
-    gamFac = (gamma(1+noFeats/2))/(linkStats.noObj(i)-1) ^ (1/noFeats);
-    linkStats.incRads(i) = constFac*detFac*gamFac;
+if trackSettings.calculated == 1
+    linkStats.incRads = zeros(size(linkStats.covDfs,1),1);
+    noFeats = size(linkStats.covDfs,2);
+    
+    constFac = ((12/pi)^(1/2))*(trackSettings.tgtDensity ^ (1/noFeats));
+    for i = 1:size(linkStats.covDfs,1)
+        detFac = (det(squeeze(linkStats.covFs(i,:,:)))/det(squeeze(linkStats.covDfs(i,:,:)))) ^ (1/(2*noFeats));
+        gamFac = (gamma(1+noFeats/2))/(linkStats.noObj(i)-1) ^ (1/noFeats);
+        linkStats.incRads(i) = constFac*detFac*gamFac;
+    end
 end
 
 if trackSettings.testTracked == 1
