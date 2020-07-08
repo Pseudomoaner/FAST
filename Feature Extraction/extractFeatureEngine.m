@@ -314,7 +314,7 @@ if size(trackableData.(featNames{1}),1) == 1
             end
             if numel(featSettings.MeanInc) > 0
                 for chan = 1:size(featSettings.MeanInc,1)
-                    fieldMean = ['channel_',num2str(featSettings.StdInc(chan)),'_mean'];
+                    fieldMean = ['channel_',num2str(featSettings.MeanInc(chan)),'_mean'];
                     procTracks(i).(fieldMean) = ChannelMeans{1}(i,chan);
                 end
             end
