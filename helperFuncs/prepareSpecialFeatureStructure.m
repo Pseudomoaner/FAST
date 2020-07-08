@@ -32,12 +32,16 @@ varNameStruct(4).hsName = 'Movement direction / deg';
 varNameStruct(5).ptName = 'area';
 varNameStruct(5).hName = 'Area';
 varNameStruct(5).hsName = ['Area / ',xSym{1},'^2'];
-varNameStruct(6).ptName = 'age';
-varNameStruct(6).hName = 'Age';
-varNameStruct(6).hsName = ['Age / ',tSym{1}];
-varNameStruct(7).ptName = 'vmag';
-varNameStruct(7).hName = 'Speed';
-varNameStruct(7).hsName = ['Speed / ', xSym{1}, ' ', tSym{1}, '^{-1}'];
+
+if ~ismissing(tSym) %Can happen if you're analysing a single frame
+    varNameStruct(6).ptName = 'age';
+    varNameStruct(6).hName = 'Age';
+    varNameStruct(6).hsName = ['Age / ',tSym{1}];
+    varNameStruct(7).ptName = 'vmag';
+    varNameStruct(7).hName = 'Speed';
+    varNameStruct(7).hsName = ['Speed / ', xSym{1}, ' ', tSym{1}, '^{-1}'];
+end
+
 varNameStruct(8).ptName = 'x';
 varNameStruct(8).hName = 'X-coordinate';
 varNameStruct(8).hsName = ['X-coordinate / ', xSym{1}];
