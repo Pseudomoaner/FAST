@@ -30,6 +30,7 @@ if ~isfield(metaStore,'upsample')
     end
 end
 
+%Load data
 try
     reader = bfGetReader([rootdir,filesep,imgName]);
     noSeries = reader.getSeriesCount();
@@ -73,10 +74,15 @@ try
             debugprogressbar([(c-1)/noC;(t-1)/noT],debugSet)
         end
     end
+catch
+    debugprogressbar([1;1],debugSet) %Make sure the modal loading bar has definitely closed
+    hErr = errordlg('This file does not appear to be readable by Bioformats. Please try again.','Bioformats import error');
+    uiwait(hErr);
+    return
+end
     
-    debugprogressbar([1;1],debugSet)
-    
-    %Copy and save metadata
+%Copy and save metadata
+try
     omeMetadata = reader.getMetadataStore();
     metaStore.maxX = reader.getSizeX();
     metaStore.maxY = reader.getSizeY();
@@ -115,11 +121,32 @@ try
     if metaStore.dx ~= metaStore.dy || ~strcmp(metaStore.ySym,metaStore.xSym)
         warning('X and Y dimension resolutions are different! FAST will use the x-dimension resolution for both, but some tracked values may need adjustment after processing.')
     end
-    
-    metaName = [rootdir,filesep,'Metadata.mat'];
-    save(metaName,'metaStore')
 catch
     debugprogressbar([1;1],debugSet) %Make sure the modal loading bar has definitely closed
-    hErr = errordlg('This file does not appear to be readable by Bioformats. Please try again.','Bioformats import error');
+    hErr = warndlg('Physical units were not available in image metadata. Please input values manually...','Bioformats import error');  
     uiwait(hErr);
+    
+    metaStore.maxX = reader.getSizeX();
+    metaStore.maxY = reader.getSizeY();
+    metaStore.maxT = reader.getSizeT();
+    
+    spCell = {'',''};
+    while numel(spCell{1}) < 1 || numel(spCell{2}) < 1 || isnan(str2double(spCell{1}))
+        spCell = inputdlg({'Number of spatial units per pixel:','Spatial symbol:'});
+    end
+    metaStore.dx = str2double(spCell{1});
+    metaStore.dy = str2double(spCell{1});
+    metaStore.xSym = spCell(2);
+    metaStore.ySym = spCell(2);
+    
+    if metaStore.maxT > 1
+        tCell = {'',''};
+        while numel(tCell{1}) < 1 || numel(tCell{2}) < 1 || isnan(str2double(tCell{1}))
+            tCell = inputdlg({'Number of time units between frames:','Time symbol:'});
+        end
+        metaStore.dt = str2double(tCell{1});
+        metaStore.timeSym = tCell(2);
+    end
 end
+metaName = [rootdir,filesep,'Metadata.mat'];
+save(metaName,'metaStore')
