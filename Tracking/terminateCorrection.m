@@ -27,4 +27,8 @@ plotTrackLengthDistribution(rawTracks.(trackDataNames{1}),handles.axes3,trackSet
 
 save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-append')
 
+if exist(fullfile(root,'Pre-division_Tracks.mat'),'file')
+    save(fullfile(root,'Pre-division_Tracks.mat'),'procTracks','fromMappings','toMappings','-append')
+end
+
 debugprogressbar([1;1;1],debugSet)
