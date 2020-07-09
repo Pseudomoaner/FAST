@@ -222,7 +222,11 @@ trackSettings.maxF = maxT;
 
 %If you have already done tracking, makes sense that you should be able to
 %have access to the track validation functionality
-if exist([root,filesep,'Tracks.mat'],'file')
+if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') %If you've run division detection already, you need to use the tracks from before division detection was applied. This will overwrite division detected data
+    load(fullfile(root,'Pre-division_Tracks.mat'),'rawTracks','trackTimes','rawToMappings','rawFromMappings')
+    handles.ValidateButt.Enable = 'on';
+    trackSettings.tracked = 1;
+elseif exist([root,filesep,'Tracks.mat'],'file')
     vars = whos('-file',[root,filesep,'Tracks.mat']);
     if sum(ismember({vars.name},'rawToMappings')) > 0 %Ensures this code only triggers if you are using a Tracks.mat file format from FAST v0.8 or later
         load([root,filesep,'Tracks.mat'],'rawTracks','trackTimes','rawToMappings','rawFromMappings')
