@@ -66,9 +66,9 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
         fullCircFrameP1 = repmat(reshape(circFrameP1,[1,size(circFrameP1,1),size(circFrameP1,2)]),[size(circFrameT,1),1,1]);
         fullCircFrameP2 = repmat(reshape(circFrameP2,[1,size(circFrameP2,1),size(circFrameP2,2)]),[size(circFrameT,1),1,1]);
     else
-        fullCircFrameT = zeros(size(fullLinFrameT,1),size(fullLinFrameT,2));
-        fullCircFrameP1 = zeros(size(fullLinFrameP1,1),size(fullLinFrameP1,2));
-        fullCircFrameP2 = zeros(size(fullLinFrameP2,1),size(fullLinFrameP2,2));
+        fullCircFrameT = zeros(size(fullLinFrameT,1),size(fullLinFrameT,2),0);
+        fullCircFrameP1 = zeros(size(fullLinFrameP1,1),size(fullLinFrameP1,2),0);
+        fullCircFrameP2 = zeros(size(fullLinFrameP2,1),size(fullLinFrameP2,2),0);
     end
     deltaF1 = cat(3,fullLinFrameP1-fullLinFrameT,mod(fullCircFrameP1-fullCircFrameT+0.5,1)-0.5);
     deltaF2 = cat(3,fullLinFrameP2-fullLinFrameT,mod(fullCircFrameP2-fullCircFrameT+0.5,1)-0.5);
