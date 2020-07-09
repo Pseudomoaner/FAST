@@ -75,7 +75,40 @@ debugprogressbar([0.4;0;0],debugSet);
 
 for j = 1:gapSize
     for i = 1:length(fromLinFeatMats) - j        
-        if ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
+        %If this is the first pass (i.e. the gap size is zero) and the
+        %covariance matrix is poorly constrained (here, if there are fewer
+        %objects in this frame than there are independent elements of the covariance
+        %matrix), just run with a nearest neighbour approach. Should be
+        %sufficiently uncrowded for this to work.
+        if j == 1 && (size(covDfs,2)*(size(covDfs,2)+1))/2 > size(fromLinFeatMats{i},1)
+            pos1 = fromLinFeatMats{i}(:,2:3);
+            pos2 = toLinFeatMats{i+j}(:,2:3);
+            D = pdist2(pos1,pos2);
+            
+            [~,minInd] = min(D(:));
+            
+            while ~isempty(D)
+                %Find the minimum distance between frames at the moment
+                [Ind1,Ind2] = ind2sub(size(D),minInd);
+                frame1Loc = fromLinFeatMats{i}(Ind1,1);
+                frame2Loc = toLinFeatMats{i+j}(Ind2,1);
+                
+                %Eliminate from distance matrix and feature matrices, and link cells.
+                fromLinFeatMats{i}(Ind1,:) = [];
+                fromCircFeatMats{i}(Ind1,:) = [];
+                toLinFeatMats{i+j}(Ind2,:) = [];
+                toCircFeatMats{i+j}(Ind2,:) = [];
+                D(Ind1,:) = [];
+                D(:,Ind2) = [];
+                
+                Tracks{i}(frame1Loc,1) = i + j;
+                Tracks{i}(frame1Loc,2) = frame2Loc;
+                Initials{i+j}(frame2Loc) = 0;
+                
+                [~,minInd] = min(D(:));
+            end
+            debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);1],debugSet)
+        elseif ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
             linFrame1 = fromLinFeatMats{i}(:,2:end);
             linFrame2 = toLinFeatMats{i+j}(:,2:end) + repmat(sum(linMs(i:i+j-1,:),1),size(toLinFeatMats{i+j},1),1);
             fullLin1 = repmat(reshape(linFrame1,[size(linFrame1,1),1,size(linFrame1,2)]),[1,size(toLinFeatMats{i+j},1),1]);
