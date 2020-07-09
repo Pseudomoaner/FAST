@@ -476,6 +476,9 @@ global debugSet
 debugprogressbar(0,debugSet)
 
 save([GUIsets.root,filesep,'Tracks.mat'],'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append');
+if exist(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'file')
+    save(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append');
+end
 
 debugprogressbar(1,debugSet)
 
