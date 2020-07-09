@@ -44,8 +44,10 @@ for i = 1:size(plotSubs,1)
     yData = {};
     
     for j = 1:size(plotSubs{i},2) %For each track in this subpopulation
-        xData = [xData;plotSubs{i}(j).(plotSettings.data1)];
-        yData = [yData;plotSubs{i}(j).(plotSettings.data2)];
+        if ~isempty(plotSubs{i}(j).(plotSettings.data1)) && ~isempty(plotSubs{i}(j).(plotSettings.data2)) %Small risk of this for certain fields
+            xData = [xData;plotSubs{i}(j).(plotSettings.data1)];
+            yData = [yData;plotSubs{i}(j).(plotSettings.data2)];
+        end
     end
     
     if ~isempty(xData)
@@ -60,7 +62,7 @@ for i = 1:size(plotSubs,1)
             end
         end
         legPos = round(size(xData{1},1)/2);
-        legH(legCount) = plot(axHand,[xData{1}(legPos),xData{j}(legPos+1)],[yData{j}(legPos),yData{j}(legPos+1)],'Color',cMaps{i}(2,:));
+        legH(legCount) = plot(axHand,[xData{1}(legPos),xData{1}(legPos+1)],[yData{1}(legPos),yData{1}(legPos+1)],'Color',cMaps{i}(2,:));
         
         legNames = [legNames;pGs.popTags{i}];
         legCount = legCount + 1;
