@@ -467,6 +467,7 @@ tmpLinkStats.circMs = tmpLinkStats.circMs(trackSettings.frameA-calcTrackSettings
 tmpLinkStats.covDfs = tmpLinkStats.covDfs(trackSettings.frameA-calcTrackSettings.minFrame+1,:,:);
 tmpLinkStats.covFs = tmpLinkStats.covFs(trackSettings.frameA-calcTrackSettings.minFrame+1,:,:);
 tmpLinkStats.trackability = tmpLinkStats.trackability(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
+tmpLinkStats.incRads = tmpLinkStats.incRads(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
 [Tracks,Initials,~,~,~,~,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(linSmallMats,circSmallMats,linSmallMats,circSmallMats,tmpLinkStats,trackSettings.gapWidth,true,trackSettings.frameA-1,debugSet);
 
 testDiffs.accept = acceptDiffs;
