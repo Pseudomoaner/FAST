@@ -14,7 +14,7 @@ whiteRectX = 0.04 * (overlaySettings.maxX/overlaySettings.pixSize);
 whiteRectY = 0.018 * (overlaySettings.maxY/overlaySettings.pixSize);
 
 for cInd = 1:length(data)
-    tInd = find(data(cInd).times == (overlaySettings.showFrame + 1));
+    tInd = find(data(cInd).times == (overlaySettings.showFrame + overlaySettings.frameOffset + 1));
     
     if ~isempty(tInd)
         xPx = round(data(cInd).x(tInd)/pxSize)-sizeOffset;
