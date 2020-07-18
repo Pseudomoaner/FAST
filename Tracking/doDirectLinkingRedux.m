@@ -171,6 +171,8 @@ for j = 1:gapSize
             delInds1 = [];
             delInds2 = [];
             
+            startObjNo = size(D,1); %Used for the progress bar
+            
             nanNosDim1 = sum(~isnan(D),1);
             
             for Ind1 = 1:size(D,1) %For each row of D
@@ -256,7 +258,7 @@ for j = 1:gapSize
                 
                 [minD,minInd] = min(D(:));
                 
-                debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);cycleCount/(size(D,1))],debugSet)
+                debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);cycleCount/startObjNo],debugSet)
             end
             
             %Do a last sweep through the distance matrix to get all the steps that didn't quite make the cut.
