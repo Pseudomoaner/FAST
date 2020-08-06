@@ -165,8 +165,8 @@ for i = 1:size(xs,1) %Loop through timepoints
         else
             imgSet{j}(:,i) = nanmean(stage2,2);
         end
+        exportData{j} = imgSet{j};
     end
-    exportData{j} = imgSet{j};
 end
 
 subplot(axHand)

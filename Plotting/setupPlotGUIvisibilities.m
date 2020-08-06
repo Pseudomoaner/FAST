@@ -241,10 +241,12 @@ switch(plotSettings.plotType)
         handles.checkbox3.Enable = 'on';
         handles.checkbox3.Visible = 'on';
         handles.checkbox3.String = 'Plot linear fit';
-        handles.checkbox4.Enable = 'off';
-        handles.checkbox4.Visible = 'off';
-        handles.checkbox5.Enable = 'off';
-        handles.checkbox5.Visible = 'off';
+        handles.checkbox4.Enable = 'on';
+        handles.checkbox4.Visible = 'on';
+        handles.checkbox4.String = 'Show all sampling points';
+        handles.checkbox5.Enable = 'on';
+        handles.checkbox5.Visible = 'on';
+        handles.checkbox5.String = 'Colour points by local density';
         handles.checkbox6.Enable = 'off';
         handles.checkbox6.Visible = 'off';
         
@@ -271,6 +273,10 @@ switch(plotSettings.plotType)
             plotSettings.check1 = 0;
             handles.checkbox3.Value = 0;
             plotSettings.check2 = 0;
+            handles.checkbox4.Value = 0;
+            plotSettings.check3 = 0;
+            handles.checkbox5.Value = 0;
+            plotSettings.check4 = 0;
         end
     case '2D histogram'
         handles.popupmenu2.Enable = 'on';
