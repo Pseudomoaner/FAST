@@ -132,10 +132,48 @@ for i = 1:size(linFeatMats,1) - 1 %Loop over time again
         if ~isempty(tmp)
             circMs(i,:) = circ_mean(tmp,[],1);
         end
-        
-        %Calculate and store trackability score
-        detFrac = det(squeeze(covFs(i,:,:)))/det(squeeze(covDfs(i,:,:)));
-        distFac = log2(pi*exp(1)/6);
-        trackability(i) = (1/2)*log2(detFrac) - (noFeats/2)*distFac - log2(size(linFeatMats{i},1));
     end
+end
+
+%If a feature is particularly stable (often true for discrete features),
+%some components of the associated covariance matrices may be zero, which
+%can cause them to be singular. As we divide by their determinants later for various purposes, we
+%need to avoid this. The following code removes these zero values and
+%replaces them with small but finite elements.
+
+minDf = inf;
+minF = inf;
+for i = 1:size(linFeatMats,1) - 1
+    currDf = squeeze(covDfs(i,:,:));
+    currDf(currDf == 0) = inf;
+    currMinDf = min(abs(diag(currDf)));
+    if currMinDf < minDf
+        minDf = currMinDf;
+    end
+    
+    currF = squeeze(covFs(i,:,:));
+    currF(currF == 0) = inf;
+    currMinF = min(abs(diag(currF)));
+    if currMinF < minF
+        minF = currMinF;
+    end
+end
+
+for i = 1:size(linFeatMats,1) - 1
+    currDf = squeeze(covDfs(i,:,:));
+    if det(currDf) == 0
+        diagZeros = find(diag(currDf) == 0);
+        covDfs(i,diagZeros,diagZeros) = minDf; %Using the minimal finite diagonal value ensures artificially inserted value is of similar OOM to actual data
+    end
+    
+    currF = squeeze(covFs(i,:,:));
+    if det(currF) == 0
+        diagZeros = find(diag(currF) == 0);
+        covFs(i,diagZeros,diagZeros) = minF;
+    end
+    
+    %Calculate and store trackability score
+    detFrac = det(squeeze(covFs(i,:,:)))/det(squeeze(covDfs(i,:,:)));
+    distFac = log2(pi*exp(1)/6);
+    trackability(i) = (1/2)*log2(detFrac) - (noFeats/2)*distFac - log2(size(linFeatMats{i},1));
 end

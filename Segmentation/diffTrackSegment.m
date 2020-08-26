@@ -953,21 +953,19 @@ if strcmp(segmentParams.overlay,'Ridges')
 end
 
 tempImg = and(Texture, ~Ridges);
-tempImg = bwmorph(tempImg,'thicken',1); %Compensates for a 1 pixel  wide winnowing that the below watershed algorithm seems to perform.
 
 %Apply a watershed transform to the image:
 dists = -bwdist(~tempImg);
-dists(~tempImg) = -Inf;
 distA = imhmin(dists,segmentParams.waterThresh);
 distW = watershed(distA);
 
 if strcmp(segmentParams.overlay,'Watershed')
     waterSE = strel('disk',1);
     binEdges = imdilate(bwmorph(tempImg,'remove'),waterSE);
-    dilatedWater = imdilate(distW == 0,waterSE);
-    colorOver = cat(3,dilatedWater,binEdges,zeros(size(distW)));
+    newEdges = imdilate(and(distW == 0, tempImg),waterSE);
+    colorOver = cat(3,or(newEdges,binEdges),binEdges,zeros(size(distW)));
     overHand = imshow(colorOver,'parent',axHand);
-    alpha = dilatedWater;
+    alpha = ~and(~newEdges,~binEdges);
     set(overHand,'AlphaData',alpha)
     axis(axHand,lims);
     return

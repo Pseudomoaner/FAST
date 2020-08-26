@@ -42,14 +42,40 @@ for i = 1:size(plotSubs,1)
     xData = [];
     yData = [];
     for j = 1:size(plotSubs{i},2)
-        xData = [xData;mean(plotSubs{i}(j).(plotSettings.data1))];
-        yData = [yData;mean(plotSubs{i}(j).(plotSettings.data2))];
+        if plotSettings.check3 %check3 corresponds to showing all points in the chosen field (rather than just the mean)
+            minSize = min(size(plotSubs{i}(j).(plotSettings.data1),1),size(plotSubs{i}(j).(plotSettings.data2),1));
+            
+            xData = [xData;plotSubs{i}(j).(plotSettings.data1)(1:minSize)];
+            yData = [yData;plotSubs{i}(j).(plotSettings.data2)(1:minSize)];
+        else
+            xData = [xData;mean(plotSubs{i}(j).(plotSettings.data1))];
+            yData = [yData;mean(plotSubs{i}(j).(plotSettings.data2))];
+        end
     end
     
     if ~isempty(xData)
-        legH(legCount) = plot(axHand,xData,yData,pGs.pointStyles{i},'MarkerEdgeColor',pGs.plotColours{i},'MarkerSize',12);
-        legNames = [legNames;pGs.popTags{i}];
-        legCount = legCount + 1;
+        if plotSettings.check4 %check4 corresponds to showing the local density of the scatter using colour
+            %Get a symbol for the legend - will be plotted over later
+            legH(legCount) = plot(axHand,xData(1),yData(1),pGs.pointStyles{i},'MarkerEdgeColor',pGs.plotColours{i},'MarkerSize',12);
+            legNames = [legNames;pGs.popTags{i}];
+            legCount = legCount + 1;
+            
+            %Compile a colourmap for this population
+            baseC = pGs.plotColours{i};
+            noCs = 65;
+            
+            lgtC = 0.5 + baseC/2;
+            drkC = baseC/2;
+            
+            sampPts = [1,(noCs+1)/2,noCs];
+            thisCmap = interp1(sampPts,[lgtC;baseC;drkC],1:noCs);
+            
+            densityScatter(xData,yData,300,3,thisCmap,axHand)
+        else
+            legH(legCount) = plot(axHand,xData,yData,pGs.pointStyles{i},'MarkerEdgeColor',pGs.plotColours{i},'MarkerSize',12);
+            legNames = [legNames;pGs.popTags{i}];
+            legCount = legCount + 1;
+        end
     end
     
     plotExport{i}.xData = xData;
