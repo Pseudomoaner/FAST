@@ -58,11 +58,9 @@ for j = 1:noFrames
     Ridges = bwareaopen(Ridges,segmentParams.RidgeAMin);
     
     tempImg = and(Texture, ~Ridges);
-    tempImg = bwmorph(tempImg,'thicken',1); %Compensates for a 1 pixel  wide winnowing that the below watershed algorithm seems to perform.
     
     %Apply a watershed transform to the image:
     dists = -bwdist(~tempImg);
-    dists(~tempImg) = -Inf;
     distA = imhmin(dists,segmentParams.waterThresh);
     distW = watershed(distA);
     

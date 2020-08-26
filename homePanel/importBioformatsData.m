@@ -71,7 +71,7 @@ try
             
             imwrite(I,imgName);
             
-            debugprogressbar([(c-1)/noC;(t-1)/noT],debugSet)
+            debugprogressbar([c/noC;t/noT],debugSet)
         end
     end
 catch
@@ -148,5 +148,7 @@ catch
         metaStore.timeSym = tCell(2);
     end
 end
+debugprogressbar([1;1],debugSet) %Make sure the modal loading bar has definitely closed
+
 metaName = [rootdir,filesep,'Metadata.mat'];
 save(metaName,'metaStore')
