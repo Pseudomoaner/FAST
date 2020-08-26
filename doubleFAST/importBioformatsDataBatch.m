@@ -7,8 +7,9 @@ function [] = importBioformatsDataBatch(rootdir,imgName,metaStore)
 %       directory.
 %       -imgName: Name of the imaging dataset within this root directory,
 %       with extension.
-%       -metaStore: Metadata storage, can be left empty if metadata hasn't
-%       been read yet. Also contains import settings (upsampling etc.)
+%       -metaStore: Metadata storage from a dataset that has already been
+%       successfully read, and will act as the template for all future 
+%       datasets. Contains import settings (upsampling etc.)
 %
 %   Author: Oliver J. Meacock (c) 2019
 

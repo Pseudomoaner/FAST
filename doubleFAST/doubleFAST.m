@@ -35,7 +35,7 @@ if exist('MetadataLoc','var') && exist('imgName','var')
     
     for r = 1:size(branches,2)
         root = [mainRoot,branches{r}];
-        importBioformatsData(root,imgName,metaStore)
+        importBioformatsDataBatch(root,imgName,metaStore)
     end
 end
 

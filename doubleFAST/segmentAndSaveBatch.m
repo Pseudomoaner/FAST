@@ -1,4 +1,13 @@
 function [] = segmentAndSaveBatch(root,segmentParams)
+%SEGMENTANDSAVEBATCH applys FAST's segmentation routine to every image in 
+%the specified imaging dataset and saves results to the specified directory.
+%
+%   INPUTS:
+%       -root: String specifying the root of the currently selected data directory
+%       -segmentParams: Structure of parameters chosen within FAST's segmentation GUI,
+%       specifying the options used during the segmentation routine.
+%
+%   Author: Oliver J. Meacock (c) 2019
 
 frameCont = dir([root,filesep,'Channel_',num2str(segmentParams.segmentChan),filesep]);
 noFrames = 0;
@@ -54,11 +63,9 @@ for j = 1:noFrames
     Ridges = bwareaopen(Ridges,segmentParams.RidgeAMin);
     
     tempImg = and(Texture, ~Ridges);
-    tempImg = bwmorph(tempImg,'thicken',1); %Compensates for a 1 pixel  wide winnowing that the below watershed algorithm seems to perform.
     
     %Apply a watershed transform to the image:
     dists = -bwdist(~tempImg);
-    dists(~tempImg) = -Inf;
     distA = imhmin(dists,segmentParams.waterThresh);
     distW = watershed(distA);
     
@@ -82,7 +89,6 @@ for j = 1:noFrames
     
     %Clear boundary touching objects and assign a unique ID number to each segmented out cell
     tempImg = imclearborder(tempImg,4);
-    %tempImg = imfill(tempImg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
     segment = bwlabel(tempImg,4);
     
     %Save the segmentation
