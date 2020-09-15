@@ -83,95 +83,7 @@ end
 
 trackableData = struct();
 
-%Initialize checkboxes based on what features have been extracted
-if isfield(procTracks,'x') && isfield(procTracks,'y')
-    handles.checkbox9.Enable = 'on';
-    handles.checkbox9.Value = 1.0;
-    handles.checkbox7.Enable = 'on';
-    handles.checkbox7.Value = 1.0;
-    divisionSettings.Velocity = 1;
-    divisionSettings.Centroid = 1;
-else
-    divisionSettings.Centroid = 0;
-    divisionSettings.Velocity = 0;
-end
-
-if isfield(procTracks,'majorLen')
-    handles.checkbox1.Enable = 'on';
-    handles.checkbox1.Value = 1.0;
-    divisionSettings.Length = 1;
-else
-    divisionSettings.Length = 0;
-end
-
-if isfield(procTracks,'area')
-    handles.checkbox2.Enable = 'on';
-    handles.checkbox2.Value = 1.0;
-    divisionSettings.Area = 1;
-else
-    divisionSettings.Area = 0;
-end
-
-if isfield(procTracks,'minorLen')
-    handles.checkbox3.Enable = 'on';
-    handles.checkbox3.Value = 1.0;
-    divisionSettings.Width = 1;
-else
-    divisionSettings.Width = 0;
-end
-
-if isfield(procTracks,'phi')
-    handles.checkbox6.Enable = 'on';
-    handles.checkbox6.Value = 1.0;
-    divisionSettings.Orientation = 1;
-else
-    divisionSettings.Orientation = 0;
-end
-
-if trackSettings.noChannels > 0
-    handles.pushbutton7.Enable = 'on';
-    divisionSettings.noChannels = trackSettings.noChannels;
-    divisionSettings.availableMeans = trackSettings.availableMeans;
-    divisionSettings.availableStds = trackSettings.availableStds;
-else
-    divisionSettings.noChannels = 0;
-    divisionSettings.availableMeans = [];
-    divisionSettings.availableStds = [];
-end
-divisionSettings.MeanInc = [];
-divisionSettings.StdInc = [];
-
-if isfield(procTracks,'sparefeat1')
-    handles.checkbox8.Enable = 'on';
-    handles.checkbox8.Value = 1.0;
-    divisionSettings.SpareFeat1 = 1;
-else
-    divisionSettings.SpareFeat1 = 0;
-end
-
-if isfield(procTracks,'sparefeat2')
-    handles.checkbox10.Enable = 'on';
-    handles.checkbox10.Value = 1.0;
-    divisionSettings.SpareFeat2 = 1;
-else
-    divisionSettings.SpareFeat2 = 0;
-end
-
-if isfield(procTracks,'sparefeat3')
-    handles.checkbox11.Enable = 'on';
-    handles.checkbox11.Value = 1.0;
-    divisionSettings.SpareFeat3 = 1;
-else
-    divisionSettings.SpareFeat3 = 0;
-end
-    
-if isfield(procTracks,'sparefeat4')
-    handles.checkbox12.Enable = 'on';
-    handles.checkbox12.Value = 1.0;
-    divisionSettings.SpareFeat4 = 1;
-else
-    divisionSettings.SpareFeat4 = 0;
-end
+[handles,divisionSettings] = setupDivisionCheckboxes(handles,procTracks,trackSettings);
 
 %Set up the sliders
 divisionSettings.incProp = trackSettings.incProp;
@@ -327,7 +239,7 @@ divisionSettings.yString = handles.popupmenu1.String{handles.popupmenu1.Value};
 
 %Indicate that statistics have been calculated
 divisionSettings.calculated = 1;
-divisionSettings.tracked = 0;
+divisionSettings.detected = 0;
 handles.pushbutton4.Enable = 'on';
 
 %Set a default value for the inclusion radius (and the maximum value, for the slider)
@@ -772,7 +684,7 @@ divisionSettings.minInc = round(get(hObject,'Value'));
 handles.minEdit.String = num2str(divisionSettings.minInc);
 
 if divisionSettings.detected == 1
-    plotLineageLengthDistribution(procTracks,divisionSettings,handles.axes3)
+    plotLineageLengthDistribution(procTracks,divisionSettings,handles.axes3);
 end
 
 
@@ -812,7 +724,7 @@ handles.minEdit.String = num2str(round(txtValue));
 handles.minSlide.Value = txtValue;
 
 if divisionSettings.detected == 1
-    plotLineageLengthDistribution(procTracks,divisionSettings,handles.axes3)
+    plotLineageLengthDistribution(procTracks,divisionSettings,handles.axes3);
 end
 
 

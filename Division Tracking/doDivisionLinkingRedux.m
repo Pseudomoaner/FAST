@@ -139,7 +139,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
             Dmaps(Dmaps(:,1) == daughterID,:) = [];
             
             singDHF = adjCov*squeeze(deltaF1(dIdx,mIdx,:));
-            acceptDiffs = [acceptDiffs,covEig'*singDHF];
+            acceptDiffs = [acceptDiffs,flip(covEig'*singDHF)];
         end
         
         %Eliminate from distance matrix and feature matrices, and link cells.
@@ -177,7 +177,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
                 Dmaps(Dmaps(:,1) == daughterID,:) = [];
                 
                 singDHF = adjCov*squeeze(deltaF1(dIdx,mIdx,:));
-                rejectDiffs = [rejectDiffs,covEig'*singDHF];
+                rejectDiffs = [rejectDiffs,flip(covEig'*singDHF)];
                 
                 %Eliminate from distance matrix and feature matrices, and link cells.
                 pred1Mat.lin(Ind2,:) = [];
@@ -215,7 +215,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
             Dmaps(Dmaps(:,1) == daughterID,:) = [];
             
             singDHF = adjCov*squeeze(deltaF2(dIdx,mIdx,:));
-            acceptDiffs = [acceptDiffs,covEig'*singDHF];
+            acceptDiffs = [acceptDiffs,flip(covEig'*singDHF)];
         end
         
         %Eliminate from distance matrix and feature matrices, and link cells.
@@ -253,7 +253,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
                 Dmaps(Dmaps(:,1) == daughterID,:) = [];
                 
                 singDHF = adjCov*squeeze(deltaF2(dIdx,mIdx,:));
-                rejectDiffs = [rejectDiffs,covEig'*singDHF];
+                rejectDiffs = [rejectDiffs,flip(covEig'*singDHF)];
                 
                 %Eliminate from distance matrix and feature matrices, and link cells.
                 pred2Mat.lin(Ind2,:) = [];

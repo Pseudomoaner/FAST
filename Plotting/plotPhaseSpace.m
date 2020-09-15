@@ -44,7 +44,7 @@ for i = 1:size(plotSubs,1)
     yData = {};
     
     for j = 1:size(plotSubs{i},2) %For each track in this subpopulation
-        if ~isempty(plotSubs{i}(j).(plotSettings.data1)) && ~isempty(plotSubs{i}(j).(plotSettings.data2)) %Small risk of this for certain fields
+        if numel(plotSubs{i}(j).(plotSettings.data1)) > 3 && numel(plotSubs{i}(j).(plotSettings.data2)) > 3 %Small risk of this not being true for certain fields
             xData = [xData;plotSubs{i}(j).(plotSettings.data1)];
             yData = [yData;plotSubs{i}(j).(plotSettings.data2)];
         end

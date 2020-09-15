@@ -223,9 +223,14 @@ trackSettings.maxF = maxT;
 %If you have already done tracking, makes sense that you should be able to
 %have access to the track validation functionality
 if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') %If you've run division detection already, you need to use the tracks from before division detection was applied. This will overwrite division detected data
-    load(fullfile(root,'Pre-division_Tracks.mat'),'rawTracks','trackTimes','rawToMappings','rawFromMappings')
+    load(fullfile(root,'Pre-division_Tracks.mat'),'trackableData','rawTracks','trackTimes','rawToMappings','rawFromMappings')
     handles.ValidateButt.Enable = 'on';
     trackSettings.tracked = 1;
+    
+    %Make sure to immediately go back to the pre-division detection file
+    %structure, to avoid issues if the module is terminated early
+    copyfile([root,filesep,'Pre-division_Tracks.mat'],[root,filesep,'Tracks.mat'])
+    delete([root,filesep,'Pre-division_Tracks.mat'])
 elseif exist([root,filesep,'Tracks.mat'],'file')
     vars = whos('-file',[root,filesep,'Tracks.mat']);
     if sum(ismember({vars.name},'rawToMappings')) > 0 %Ensures this code only triggers if you are using a Tracks.mat file format from FAST v0.8 or later
@@ -403,7 +408,7 @@ end
 %Build feature matrices
 [featMats.lin,featMats.circ] = buildFeatureMatricesRedux(trackableData,featureStruct,possIdx,trackSettings.minFrame,trackSettings.maxFrame);
 
-[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.gapWidth,false,0,debugSet);
+[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.gapWidth,false,debugSet);
 
 trackDataNames = fieldnames(trackableData);
 rawTracks = struct();
@@ -468,7 +473,7 @@ tmpLinkStats.covDfs = tmpLinkStats.covDfs(trackSettings.frameA-calcTrackSettings
 tmpLinkStats.covFs = tmpLinkStats.covFs(trackSettings.frameA-calcTrackSettings.minFrame+1,:,:);
 tmpLinkStats.trackability = tmpLinkStats.trackability(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
 tmpLinkStats.incRads = tmpLinkStats.incRads(trackSettings.frameA-calcTrackSettings.minFrame+1,:);
-[Tracks,Initials,~,~,~,~,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(linSmallMats,circSmallMats,linSmallMats,circSmallMats,tmpLinkStats,trackSettings.gapWidth,true,trackSettings.frameA-1,debugSet);
+[Tracks,Initials,~,~,~,~,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(linSmallMats,circSmallMats,linSmallMats,circSmallMats,tmpLinkStats,trackSettings.gapWidth,true,debugSet);
 
 testDiffs.accept = acceptDiffs;
 testDiffs.reject = rejectDiffs;

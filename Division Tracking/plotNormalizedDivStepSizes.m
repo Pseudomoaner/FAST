@@ -24,28 +24,32 @@ function [] = plotNormalizedDivStepSizes(divisionSettings,linkDiffs,linkStats,ax
 xString = divisionSettings.xString;
 yString = divisionSettings.yString;
 
-featureStruct = prepareTrackStruct(divisionSettings);
+featureStruct = prepareDivStruct(divisionSettings);
 
 featureNames = fieldnames(featureStruct);
 
 %Find the location of the data corresponding to the requested x-axis in the feature matrices
 timeInds = 1; %Because of the way division detection is set up, 'd(t)' ALWAYS comes in  the first column of the feature matrices.
-centInds = find(cellfun(@(x) strcmp(x,'Centroid'),featureNames));
-veloInds = find(cellfun(@(x) strcmp(x,'Velocity'),featureNames));
-areaInds = find(cellfun(@(x) strcmp(x,'Area'),featureNames));
-lengInds = find(cellfun(@(x) strcmp(x,'Length'),featureNames));
-widtInds = find(cellfun(@(x) strcmp(x,'Width'),featureNames));
-orieInds = find(cellfun(@(x) strcmp(x,'Orientation'),featureNames));
-chmeInds = find(cellfun(@(x) strcmp(x,'ChannelMean'),featureNames));
-chstInds = find(cellfun(@(x) strcmp(x,'ChannelStd'),featureNames));
-spf1Inds = find(cellfun(@(x) strcmp(x,'SpareFeat1'),featureNames));
-spf2Inds = find(cellfun(@(x) strcmp(x,'SpareFeat2'),featureNames));
-spf3Inds = find(cellfun(@(x) strcmp(x,'SpareFeat3'),featureNames));
-spf4Inds = find(cellfun(@(x) strcmp(x,'SpareFeat4'),featureNames));
+xInds = find(cellfun(@(x) strcmp(x,'x'),featureNames)) + 1;
+yInds = find(cellfun(@(x) strcmp(x,'y'),featureNames)) + 1;
+veloInds = find(cellfun(@(x) strcmp(x,'vmag'),featureNames)) + 1;
+areaInds = find(cellfun(@(x) strcmp(x,'area'),featureNames)) + 1;
+lengInds = find(cellfun(@(x) strcmp(x,'majorLen'),featureNames)) + 1;
+widtInds = find(cellfun(@(x) strcmp(x,'minorLen'),featureNames)) + 1;
+orieInds = find(cellfun(@(x) strcmp(x,'phi'),featureNames)) + 1 ;
+chmeInds = find(cellfun(@(x) strcmp(x,'ChannelMean'),featureNames)) + 1;
+chstInds = find(cellfun(@(x) strcmp(x,'ChannelStd'),featureNames)) + 1;
+spf1Inds = find(cellfun(@(x) strcmp(x,'sparefeat1'),featureNames)) + 1;
+spf2Inds = find(cellfun(@(x) strcmp(x,'sparefeat2'),featureNames)) + 1;
+spf3Inds = find(cellfun(@(x) strcmp(x,'sparefeat3'),featureNames)) + 1;
+spf4Inds = find(cellfun(@(x) strcmp(x,'sparefeat4'),featureNames)) + 1;
 
 if ~isempty(orieInds) %Special case, as Orientations is a circular statistic. Gets tagged onto the end of the linkDiffs columns, no matter where it is.
-    if ~isempty(centInds) && orieInds < max(centInds)
-        centInds = centInds - 1;
+    if ~isempty(xInds) && orieInds < max(xInds)
+        xInds = xInds - 1;
+    end
+    if ~isempty(yInds) && orieInds < max(yInds)
+        yInds = yInds - 1;
     end
     if ~isempty(veloInds) && orieInds < max(veloInds)
         veloInds = veloInds - 1;
@@ -77,21 +81,25 @@ if ~isempty(orieInds) %Special case, as Orientations is a circular statistic. Ge
     if ~isempty(spf4Inds) && orieInds < max(spf4Inds)
         spf4Inds = spf4Inds - 1;
     end
-    orieInds = max([centInds,veloInds,areaInds,lengInds,widtInds,chmeInds,chstInds,spf1Inds,spf2Inds,spf3Inds,spf4Inds]) + 1;
+    orieInds = max([xInds,yInds,veloInds,areaInds,lengInds,widtInds,chmeInds,chstInds,spf1Inds,spf2Inds,spf3Inds,spf4Inds]) + 1;
 end
 
 %sortList is the order of features as they will occur in the linkDiffs.accept/reject matrices (columnwise)
-[~,sortList] = sort([timeInds,centInds,veloInds,areaInds,lengInds,widtInds,chmeInds,chstInds,spf1Inds,spf2Inds,spf3Inds,spf4Inds,orieInds]);
+[~,sortList] = sort([timeInds,xInds,yInds,veloInds,areaInds,lengInds,widtInds,chmeInds,chstInds,spf1Inds,spf2Inds,spf3Inds,spf4Inds,orieInds]);
 
-popupStrings = {'d(t)'}; %Because of the way division detection is set up, 'd(t)' ALWAYS comes in  the first column of the feature matrices.
+popupStrings{1} = {'d(t)'}; %Because of the way division detection is set up, 'd(t)' ALWAYS comes in  the first column of the feature matrices.
 popupInd = 2;
 
-if ~isempty(centInds)
-    popupStrings{popupInd} = {'d(x)';'d(y)'};
+if ~isempty(xInds)
+    popupStrings{popupInd} = {'d(x)'};
+    popupInd = popupInd + 1;
+end
+if ~isempty(yInds)
+    popupStrings{popupInd} = {'d(y)'};
     popupInd = popupInd + 1;
 end
 if ~isempty(veloInds)
-    popupStrings{popupInd} = {'d(Vx)';'d(Vy)'};
+    popupStrings{popupInd} = {'d(Speed)'};
     popupInd = popupInd + 1;
 end
 if ~isempty(areaInds)
@@ -108,7 +116,7 @@ if ~isempty(widtInds)
 end
 if ~isempty(chmeInds)
     chmeNames = {};
-    for chan = 1:divisionSettings.Channels
+    for chan = divisionSettings.MeanInc'
         chmeNames = [chmeNames;['d(Channel ',num2str(chan),' intensity)']];
     end
     popupStrings{popupInd} = chmeNames;
@@ -116,7 +124,7 @@ if ~isempty(chmeInds)
 end
 if ~isempty(chstInds)
     chstNames = {};
-    for chan = 1:divisionSettings.Channels
+    for chan = divisionSettings.StdInc'
         chmeNames = [chstNames;['d(Channel ',num2str(chan),' variation)']];
     end
     popupStrings{popupInd} = chstNames;
