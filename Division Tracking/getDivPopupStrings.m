@@ -20,14 +20,13 @@ stringArrayX = {'x variable'};
 stringArrayY = {'y variable'};
 
 stringArray = {'d(t)'};
-% Below needs to be reinstated once velocity based tracking is included!
-% if trackSettings.Velocity == 1
-%     stringArray = [stringArray;'d(Vx)'];
-%     stringArray = [stringArray;'d(Vy)'];
-% end
+
 if trackSettings.Centroid == 1
     stringArray = [stringArray;'d(x)'];
     stringArray = [stringArray;'d(y)'];
+end
+if trackSettings.Velocity == 1
+    stringArray = [stringArray;'d(Speed)'];
 end
 if trackSettings.Length == 1
     stringArray = [stringArray;'d(Length)'];

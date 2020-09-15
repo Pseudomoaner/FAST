@@ -16,8 +16,6 @@ function featureStruct = prepareDivStruct(divSettings)
 %
 %   Author: Oliver J. Meacock (c) 2019
 
-%I have a general desire to incorporate velocity based tracking at some stage... but not to begin with.
-
 featureStruct = struct();
 
 if divSettings.Centroid == 1
@@ -33,13 +31,13 @@ if divSettings.Centroid == 1
     featureStruct.y.('StatsType') = 'Linear';
 end
 
-% if trackSettings.Velocity == 1
-%     featureStruct.('Velocity').('Locations') = [1,2]; %Locations tells it where to look in the PCs.Cells(i).(featurename)(x) call, where x is replaced by the numbers shown here.
-%     if trackSettings.divDect
-%         featureStruct.Centroid.('postDivScale') = @(x,c) [x(3), x(4);x(3), x(4)]; %Function handle that tells it how much to expect the value to change after division. x is the vector of linear features, c the vector of circular features.
-%     end
-%     featureStruct.Centroid.('StatsType') = 'Linear'; %Linear or circular - alters how differences are calculated later on.
-% end
+if divSettings.Velocity == 1
+    featureStruct.('vmag').('Locations') = 1;
+    featureStruct.vmag.('divArguments') = {'vmag'};
+    featureStruct.vmag.('postDivScale1') = @(x) x;
+    featureStruct.vmag.('postDivScale2') = @(x) x;
+    featureStruct.vmag.('StatsType') = 'Linear';
+end
 
 if divSettings.Area == 1
     featureStruct.('area').('Locations') = 1; 
@@ -89,11 +87,14 @@ if ~isempty(divSettings.MeanInc)
     logicAvail(divSettings.availableMeans) = true;
     logicUsed(divSettings.MeanInc) = true;
     
-    featureStruct.('ChannelMean').('Locations') = find(logicUsed(logicAvail));
-    featureStruct.ChannelMean.('divArguments') = {'ChannelMean'};
-    featureStruct.ChannelMean.('postDivScale1') = @(x) x;
-    featureStruct.ChannelMean.('postDivScale2') = @(x) x;
-    featureStruct.ChannelMean.('StatsType') = 'Linear';
+    for i = 1:size(logicUsed,1)
+        currFeatStr = ['channel_',num2str(logicUsed(i)),'_mean'];
+        featureStruct.(currFeatStr).('Locations') = 1;
+        featureStruct.(currFeatStr).('divArguments') = {currFeatStr};
+        featureStruct.(currFeatStr).('postDivScale1') = @(x) x;
+        featureStruct.(currFeatStr).('postDivScale2') = @(x) x;
+        featureStruct.(currFeatStr).('StatsType') = 'Linear';
+    end
 end
 
 if ~isempty(divSettings.StdInc)
@@ -102,11 +103,14 @@ if ~isempty(divSettings.StdInc)
     logicAvail(divSettings.availableStds) = true;
     logicUsed(divSettings.StdInc) = true;
     
-    featureStruct.('ChannelStd').('Locations') = find(logicUsed(logicAvail));
-    featureStruct.ChannelStd.('divArguments') = {'ChannelStd'};
-    featureStruct.ChannelStd.('postDivScale1') = @(x) x;
-    featureStruct.ChannelStd.('postDivScale2') = @(x) x;
-    featureStruct.ChannelStd.('StatsType') = 'Linear';
+    for i = 1:size(logicUsed,1)
+        currFeatStr = ['channel_',num2str(logicUsed(i)),'_std'];
+        featureStruct.(currFeatStr).('Locations') = 1;
+        featureStruct.(currFeatStr).('divArguments') = {currFeatStr};
+        featureStruct.(currFeatStr).('postDivScale1') = @(x) x;
+        featureStruct.(currFeatStr).('postDivScale2') = @(x) x;
+        featureStruct.(currFeatStr).('StatsType') = 'Linear';
+    end
 end
 
 if divSettings.SpareFeat1 == 1

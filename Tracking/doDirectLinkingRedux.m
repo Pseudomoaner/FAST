@@ -1,4 +1,4 @@
-function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,linkStats,gapSize,returnSteps,frameOffset,debugSet)
+function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,acceptDiffs,rejectDiffs] = doDirectLinkingRedux(fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircFeatMats,linkStats,gapSize,returnSteps,debugSet)
 %DODIRECTLINKINGREDUX performs object-object linking based on minimisation
 %of the distance between sequential objects in the normalised displacement
 %space.
@@ -21,10 +21,6 @@ function [Tracks,Initials,fromLinFeatMats,fromCircFeatMats,toLinFeatMats,toCircF
 %       -returnSteps: Set true to return the displacements (in the normalised
 %       feature space) of the positive and negative links. Used for
 %       plotting projections of the normalised displacement space.
-%       -frameOffset: Only really useful for test-tracking (set to 0 for
-%       all other purposes) - is an integer added to the frame index i when
-%       pulling statistics out of the contents of linkStats. Allows you to
-%       specify a single frame for analysis.
 %       -debugSet: Set true if FAST is in debug mode.
 %
 %   OUTPUTS:
@@ -125,7 +121,7 @@ for j = 1:gapSize
             end           
             deltaF = cat(3,fullLin2-fullLin1,mod(fullCirc2-fullCirc1+0.5,1)-0.5);
             
-            incRad = incRads(i + frameOffset); %Dynamically vary inclusion radius to keep density of target volume the same
+            incRad = incRads(i); %Dynamically vary inclusion radius to keep density of target volume the same
             [covEig,covDiag] = eig(squeeze(covDfs(i,:,:)));
             adjCov = covEig*(covDiag^(-1/2))*covEig'; %Principal inverse square root (equivalent to covDfs^-1/2, but we need covEig for rotating back into the feature basis later so may as well write it out in full)
             
