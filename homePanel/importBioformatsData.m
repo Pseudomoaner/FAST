@@ -94,8 +94,10 @@ try
             metaStore.timeSym = omeMetadata.getPixelsTimeIncrement(0).unit().getSymbol();
         catch
             timeData = cell(2,1);
-            while ~(sum(isstrprop(timeData{1},'digit'))>0 && sum(isstrprop(timeData{1},'digit')) == numel(timeData{1})) || ~(isa(timeData{2},'string') || isa(timeData{2},'char'))
-                timeData = inputdlg({'Time increment','Units'},'Time information not available in image metadata. Please input manually:');
+            hErr = warndlg('Units of time were not available in image metadata. Please input values manually...','Bioformats import error');
+            uiwait(hErr);
+            while ~(sum(isstrprop(timeData{1},'digit'))>0 && (sum(isstrprop(timeData{1},'digit')) + sum(timeData{1} == '.')) == numel(timeData{1})) || ~(isa(timeData{2},'string') || isa(timeData{2},'char'))
+                timeData = inputdlg({'Time increment','Units'},'Please input time units:');
             end
             
             metaStore.dt = str2double(timeData{1});

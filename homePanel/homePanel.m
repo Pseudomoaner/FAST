@@ -111,7 +111,18 @@ nextHand.debugSet = debugSet;
 % handles    structure with handles and user data (see GUIDATA)
 diffHand = diffTrackSegment(nextHand);
 if ~debugSet
-    diffHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 diffHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
 
@@ -129,7 +140,18 @@ nextHand.debugSet = debugSet;
 % handles    structure with handles and user data (see GUIDATA)
 overHand = overlayTester(nextHand);
 if ~debugSet
-    overHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 overHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
 
@@ -146,7 +168,18 @@ nextHand.debugSet = debugSet;
 % handles    structure with handles and user data (see GUIDATA)
 extHand = extractFeatures(nextHand);
 if ~debugSet
-    extHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 extHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
 
@@ -164,7 +197,18 @@ nextHand.debugSet = debugSet;
 % handles    structure with handles and user data (see GUIDATA)
 diffHand = diffusionTracker(nextHand);
 if ~debugSet
-    diffHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 diffHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
 
@@ -216,7 +260,18 @@ nextHand.debugSet = debugSet;
 % handles    structure with handles and user data (see GUIDATA)
 diffHand = divisionTracker(nextHand);
 if ~debugSet
-    diffHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 diffHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
 
@@ -235,6 +290,17 @@ nextHand.debugSet = debugSet;
 
 diffHand = plotTracks(nextHand);
 if ~debugSet
-    diffHand.WindowStyle = 'modal';
+    handles.SegPush.Enable = 'off';
+    handles.SegPush.BackgroundColor = [1,0.7,0.7];
+    handles.FeatPush.Enable = 'off';
+    handles.FeatPush.BackgroundColor = [1,0.7,0.7];
+    handles.TrackPush.Enable = 'off';
+    handles.TrackPush.BackgroundColor = [1,0.7,0.7];
+    handles.DivPush.Enable = 'off';
+    handles.DivPush.BackgroundColor = [1,0.7,0.7];
+    handles.OverPush.Enable = 'off';
+    handles.OverPush.BackgroundColor = [1,0.7,0.7];
+    handles.PlotPush.Enable = 'off';
+    handles.PlotPush.BackgroundColor = [1,0.7,0.7];
 end
 diffHand.DeleteFcn = {@updateHomePanelButtons,handles,rootdir};
