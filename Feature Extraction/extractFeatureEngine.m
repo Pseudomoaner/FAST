@@ -89,7 +89,7 @@ end
 debugprogressbar(0,debugSet);
 
 %Check whether a custom feature extraction script exists
-customise =  exist(fullfile(root,'customFeats.m'),'file');
+customise = and(exist(fullfile(root,'customFeats.m'),'file'),~isdeployed); %Latter argument ensures you don't get errors if using pre-compiled version of FAST
 if customise
     addpath(fullfile(root));
     noSFs = size(customFeats([],[],[]),1);
