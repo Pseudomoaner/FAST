@@ -29,7 +29,7 @@ function imgHand = displayEditableTracks(GUIsets,currTracks,trackTimes,fromMappi
 
 cla(axH)
 
-imgPath = [GUIsets.underlayDir,filesep,sprintf('frame_%04d.tif',GUIsets.frame-1)];
+imgPath = [GUIsets.underlayDir,filesep,sprintf('Frame_%04d.tif',GUIsets.frame-1)];
 img = double(imread(imgPath));
 
 %Enforce 8-bit representation
