@@ -40,9 +40,11 @@ for cInd = 1:size(data,2)
                     thisInd = 1;
                 end
                 thisCol = cmap(thisInd,:);
-                patchline([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'EdgeColor',thisCol,'linewidth',4,'edgealpha',j/size(remainingPos,1),'Parent',axHand)
+                %patchline([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'EdgeColor',thisCol,'linewidth',4,'edgealpha',j/size(remainingPos,1),'Parent',axHand)
+                plot([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'Color',thisCol,'linewidth',1.5,'Parent',axHand)
             else
-                patchline([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'EdgeColor',colourmap(cInd,:),'linewidth',4,'edgealpha',j/size(remainingPos,1),'Parent',axHand)
+                %patchline([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'EdgeColor',colourmap(cInd,:),'linewidth',4,'edgealpha',j/size(remainingPos,1),'Parent',axHand)
+                plot([remainingPos(j,1),remainingPos(j+1,1)],[remainingPos(j,2),remainingPos(j+1,2)],'Color',colourmap(cInd,:),'linewidth',1.5,'Parent',axHand)
             end
         end
         if strcmp(overlaySettings.info,'Data')

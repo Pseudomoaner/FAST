@@ -41,75 +41,38 @@ localTol = 1;
 for cInd = 1:length(data)
     tInd = find(data(cInd).times == Frame);
     
-    if ~isempty(tInd) %If cell is tracked in this frame, use the segmentation as a mask
+    if ~isempty(tInd) %If cell is tracked in this frame, insert into image
+        %Find colour cell should be marked as
+        if strcmp(overlaySettings.info,'Data') && tInd <= size(data(cInd).(overlaySettings.data),1) %Second condition can be true if you're looking at a higher-order measurement (e.g. velocity) and you're near the end of the track
+            thisDat = data(cInd).(overlaySettings.data)(tInd);
+            thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
+            if thisInd == 0
+                thisInd = 1;
+            end
+            thisCol = cmap(thisInd,:);
+        elseif tInd <= size(data(cInd).(overlaySettings.data),1)
+            thisCol = colourmap(cInd,:);
+        end
+        
         xPx = round(data(cInd).x(tInd)/pxSize);
         yPx = round(data(cInd).y(tInd)/pxSize);
         
-        segmentID = centIDs(and(and(centres(:,1) < xPx + localTol,centres(:,1) > xPx - localTol),and(centres(:,2) < yPx + localTol,centres(:,2) > yPx - localTol)));
+        if data(cInd).interpolated(tInd) == 1 %If the current timepoint is an interpolated timepoint (so no corresponding mask) draw a circle instead of boundary
+            rad = data(cInd).minorLen(tInd)/(pxSize*2);
+            [rCh,gCh,bCh] = drawCircleOnImg(xPx,yPx,rad,rCh,gCh,bCh,thisCol);
+        elseif data(cInd).interpolated(tInd) == 0
+            segmentID = centIDs(and(and(centres(:,1) < xPx + localTol,centres(:,1) > xPx - localTol),and(centres(:,2) < yPx + localTol,centres(:,2) > yPx - localTol)));
+            
+            oneCell = segFrame == segmentID;
+            bound = bwperim(oneCell);
+            
+            se = strel('disk',2);
+            bound = imdilate(bound,se);
         
-        oneCell = segFrame == segmentID;
-        bound = bwperim(oneCell);
-        
-        se = strel('disk',2);
-        bound = imdilate(bound,se);
-        
-        if ~isempty(segmentID) %In principle, should never be empty. But best to be on the safe side.
-            if strcmp(overlaySettings.info,'Data')
-                if tInd > size(data(cInd).(overlaySettings.data),1)
-                    thisDat = data(cInd).(overlaySettings.data)(end);
-                else
-                    thisDat = data(cInd).(overlaySettings.data)(tInd);
-                end
-                thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
-                if thisInd == 0
-                    thisInd = 1;
-                end
-                thisCol = cmap(thisInd,:);
-                
+            if ~isempty(bound) %In principle, should never be empty. But best to be on the safe side.
                 rCh(bound) = thisCol(1);
                 gCh(bound) = thisCol(2);
                 bCh(bound) = thisCol(3);
-            else
-                rCh(bound) = colourmap(cInd,1);
-                gCh(bound) = colourmap(cInd,2);
-                bCh(bound) = colourmap(cInd,3);
-            end
-        end
-    else %Otherwise, draw a circle on the frame based on an interpolation between the previously and next tracked points.
-        tPre = find(data(cInd).times < Frame);
-        tPost = find(data(cInd).times > Frame);
-        if ~isempty(tPre) && ~isempty(tPost)
-            tIndPre = tPre(end);
-            tIndPost = tPost(1);
-            
-            tPre = data(cInd).times(tIndPre);
-            tPost = data(cInd).times(tIndPost);
-            
-            tInterp = (Frame-tPre)/(tPost-tPre); %Factor to multiply interpolations by
-            
-            dX = data(cInd).x(tIndPost)-data(cInd).x(tIndPre);
-            dY = data(cInd).y(tIndPost)-data(cInd).y(tIndPre);
-            
-            xPx = (data(cInd).x(tIndPre) + dX*tInterp)/pxSize;
-            yPx = (data(cInd).y(tIndPre) + dY*tInterp)/pxSize;
-            
-            width = data(cInd).minorLen(tIndPre)/(pxSize*2);
-            
-            if strcmp(overlaySettings.info,'Data')
-                if tPre > size(data(cInd).(overlaySettings.data),1)
-                    thisDat = data(cInd).(overlaySettings.data)(end);
-                else
-                    thisDat = data(cInd).(overlaySettings.data)(tIndPre);
-                end
-                thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
-                if thisInd == 0
-                    thisInd = 1;
-                end
-                thisCol = cmap(thisInd,:);
-                
-                [rCh,gCh,bCh] = drawCircleOnImg(xPx,yPx,width,rCh,gCh,bCh,thisCol);
-            else
-                [rCh,gCh,bCh] = drawCircleOnImg(xPx,yPx,width,rCh,gCh,bCh,colourmap(cInd,:));
             end
         end
     end
