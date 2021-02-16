@@ -71,7 +71,7 @@ debugprogressbar([0.4;0;0],debugSet);
 
 for j = 1:gapSize
     for i = 1:length(fromLinFeatMats) - j        
-        %If this is the first pass (i.e. the gap size is one) and the
+        %If this is the first pass (i.e. the gap size is zero) and the
         %covariance matrix is poorly constrained (here, if there are fewer
         %objects in this frame than there are independent elements of the covariance
         %matrix), just run with a nearest neighbour approach. Should be
@@ -180,7 +180,10 @@ for j = 1:gapSize
                         
                         frame1Loc = fromLinFeatMats{i}(Ind1,1);
                         frame2Loc = toLinFeatMats{i+j}(Ind2,1);
-                                                
+                        
+                        delInds1 = [delInds1;Ind1]; %Regardless of whether or not you accept this candidate, it should be deleted from D
+                        delInds2 = [delInds2;Ind2];
+                        
                         %The below will only activate if 'Test Track' has been
                         %pushed - so don't need to worry about dealing with
                         %frame-frame linking, which is only applicable to the
@@ -201,8 +204,6 @@ for j = 1:gapSize
                             Tracks{i}(frame1Loc,1) = i + j;
                             Tracks{i}(frame1Loc,2) = frame2Loc;
                             Initials{i+j}(frame2Loc) = 0;
-                            delInds1 = [delInds1;Ind1];
-                            delInds2 = [delInds2;Ind2];
                         end
                     end
                 end
