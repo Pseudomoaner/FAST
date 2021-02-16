@@ -337,6 +337,7 @@ global featMats
 global featureStruct
 global possIdx
 global debugSet
+global unnormStepSizes
 
 [linkStats,featMats,featureStruct,possIdx] = gatherLinkStats(trackableData,trackSettings,debugSet);
 
@@ -368,7 +369,7 @@ end
 
 %Do the plotting for the GUI - axes 1 and 5
 handles.axes5.Visible = 'on';
-plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,handles.axes1,handles.axes5);
+unnormStepSizes = plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,[],handles.axes1,handles.axes5);
 
 %Clear the axes for the other figures (no longer accurate with new calculated statistics)
 cla(handles.axes2)
@@ -721,13 +722,14 @@ function PropSlide_Callback(hObject, eventdata, handles)
 global trackSettings
 global featMats
 global linkStats
+global unnormStepSizes
 
 trackSettings.incProp = get(hObject,'Value');
 handles.PropEdit.String = num2str(trackSettings.incProp);
 
 if trackSettings.calculated == 1
     %Do the plotting for the GUI
-    plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,handles.axes1,handles.axes5);
+    plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,unnormStepSizes,handles.axes1,handles.axes5);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -751,6 +753,7 @@ function PropEdit_Callback(hObject, eventdata, handles)
 global trackSettings
 global featMats
 global linkStats
+global unnormStepSizes
 
 txtValue = str2double(get(hObject,'String'));
 
@@ -766,7 +769,7 @@ handles.PropSlide.Value = txtValue;
 
 if trackSettings.calculated == 1
     %Do the plotting for the GUI
-    plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,handles.axes1,handles.axes5);
+    plotUnnormalizedStepSizes(featMats,trackSettings.incProp,trackSettings.statsUse,linkStats.trackability,unnormStepSizes,handles.axes1,handles.axes5);
 end
 
 % --- Executes during object creation, after setting all properties.

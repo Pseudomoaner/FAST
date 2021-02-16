@@ -28,15 +28,16 @@ for i = 1:length(Times)
         rawX = Centroids{i}(:,1);
         rawY = Centroids{i}(:,2);
         
-        rawdX = diff(rawX);
-        rawdY = diff(rawY);
-        dt = diff(Times{i})'*tStep;
+        interpX = interp1(Times{i},rawX,Times{i}(1):Times{i}(end))';
+        interpY = interp1(Times{i},rawY,Times{i}(1):Times{i}(end))';
         
-        rawVel = [rawdX./dt,rawdY./dt];
+        interpDX = diff(interpX);
+        interpDY = diff(interpY);
         
-        RawSpeed{i} = sqrt(sum(rawVel.^2,2));
+        rawVel = [interpDX./tStep,interpDY./tStep];
         
-        RawPhi{i} = -atan2d(rawdY,rawdX);
+        RawSpeed{i} = sqrt(sum(rawVel.^2,2));        
+        RawPhi{i} = -atan2d(interpDY,interpDX);
     else
         RawSpeed{i} = NaN;
         RawPhi{i} = NaN;
