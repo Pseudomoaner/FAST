@@ -42,51 +42,61 @@ bCh = img;
 se = strel('disk',2);
 switch GUIsets.mode
     case 'Cut' %In this case, plot ALL boundaries between this frame and the next.
-        for i = 1:max(segDat.frames{1}(:))
-            oneCell = segDat.frames{1} == i;
-            bound = bwperim(oneCell);
-            bound = imdilate(bound,se);
-            
-            trackID = toMappings{GUIsets.frame}(i,1);
-            
-            rCh(bound) = cScheme(trackID,1);
-            gCh(bound) = cScheme(trackID,2);
-            bCh(bound) = cScheme(trackID,3);
-        end
-        
-        if ~isempty(GUIsets.cutID) && GUIsets.frame == GUIsets.cutT
-            oneCell = segDat.frames{1} == GUIsets.cutID;
-            bound = bwperim(oneCell);
-            bound = imdilate(bound,se);
-            
-            rCh(bound) = 255;
-            gCh(bound) = 210;
-            bCh(bound) = 0;
-        end
-        
-        imgHand = image(uint8(cat(3,rCh,gCh,bCh)),'Parent',axH);
-        hold on
-        axis equal
-        axis tight
-        axH.Box = 'off';
-        axH.XTick = [];
-        axH.YTick = [];
-        
-        if isfield(currTracks,'Centroid')
-            tgts = toMappings{GUIsets.frame};
-            for i = 1:size(tgts,1)
-                trackID = tgts(i,1);
-                trackFrm = tgts(i,2);
+        if GUIsets.minF <= GUIsets.frame && GUIsets.maxF >= GUIsets.frame %Only do something if the currently selected frame is in the user-selected range
+            for i = 1:max(segDat.frames{1}(:))
+                oneCell = segDat.frames{1} == i;
+                bound = bwperim(oneCell);
+                bound = imdilate(bound,se);
                 
-                if size(currTracks.Centroid{trackID},1) > trackFrm %If there is at least one frame after this one
-                    currPos = round(currTracks.Centroid{trackID}(trackFrm,:)/GUIsets.pxSize);
-                    nextPos = round(currTracks.Centroid{trackID}(trackFrm + 1,:)/GUIsets.pxSize);
-                    posDiff = nextPos - currPos;
+                trackID = toMappings{GUIsets.frame-GUIsets.minF+1}(i,1);
+                
+                rCh(bound) = cScheme(trackID,1);
+                gCh(bound) = cScheme(trackID,2);
+                bCh(bound) = cScheme(trackID,3);
+            end
+            
+            if ~isempty(GUIsets.cutID) && GUIsets.frame == GUIsets.cutT
+                oneCell = segDat.frames{1} == GUIsets.cutID;
+                bound = bwperim(oneCell);
+                bound = imdilate(bound,se);
+                
+                rCh(bound) = 255;
+                gCh(bound) = 210;
+                bCh(bound) = 0;
+            end
+            
+            imgHand = image(uint8(cat(3,rCh,gCh,bCh)),'Parent',axH);
+            hold on
+            axis equal
+            axis tight
+            axH.Box = 'off';
+            axH.XTick = [];
+            axH.YTick = [];
+            
+            if isfield(currTracks,'Centroid')
+                tgts = toMappings{GUIsets.frame-GUIsets.minF+1};
+                for i = 1:size(tgts,1)
+                    trackID = tgts(i,1);
+                    trackFrm = tgts(i,2);
                     
-                    plot(currPos(1),currPos(2),'.','Color',cScheme(trackID,:)/255,'MarkerSize',8)
-                    plotarrow(currPos(1),currPos(2),posDiff(1),posDiff(2),cScheme(trackID,:)/255,2,axH)
+                    if size(currTracks.Centroid{trackID},1) > trackFrm %If there is at least one frame after this one
+                        currPos = round(currTracks.Centroid{trackID}(trackFrm,:)/GUIsets.pxSize);
+                        nextPos = round(currTracks.Centroid{trackID}(trackFrm + 1,:)/GUIsets.pxSize);
+                        posDiff = nextPos - currPos;
+                        
+                        plot(currPos(1),currPos(2),'.','Color',cScheme(trackID,:)/255,'MarkerSize',8)
+                        plotarrow(currPos(1),currPos(2),posDiff(1),posDiff(2),cScheme(trackID,:)/255,2,axH)
+                    end
                 end
             end
+        else
+            imgHand = image(uint8(cat(3,rCh,gCh,bCh)),'Parent',axH);
+            hold on
+            axis equal
+            axis tight
+            axH.Box = 'off';
+            axH.XTick = [];
+            axH.YTick = [];
         end
     case 'Fuse' %In this case, plot the boundaries of only those objects with tracks beginning or ending in the given frame.
         %Find start and end times of all tracks
