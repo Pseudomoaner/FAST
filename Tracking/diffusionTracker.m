@@ -223,7 +223,7 @@ trackSettings.maxF = maxT;
 %If you have already done tracking, makes sense that you should be able to
 %have access to the track validation functionality
 if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') %If you've run division detection already, you need to use the tracks from before division detection was applied. This will overwrite division detected data
-    load(fullfile(root,'Pre-division_Tracks.mat'),'trackableData','rawTracks','trackTimes','rawToMappings','rawFromMappings')
+    load(fullfile(root,'Pre-division_Tracks.mat'),'trackableData','rawTracks','trackTimes','rawToMappings','rawFromMappings','trackSettings')
     handles.ValidateButt.Enable = 'on';
     trackSettings.tracked = 1;
     
@@ -234,10 +234,48 @@ if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') %If you've run divisio
 elseif exist([root,filesep,'Tracks.mat'],'file')
     vars = whos('-file',[root,filesep,'Tracks.mat']);
     if sum(ismember({vars.name},'rawToMappings')) > 0 %Ensures this code only triggers if you are using a Tracks.mat file format from FAST v0.8 or later
-        load([root,filesep,'Tracks.mat'],'rawTracks','trackTimes','rawToMappings','rawFromMappings')
+        load([root,filesep,'Tracks.mat'],'rawTracks','trackTimes','rawToMappings','rawFromMappings','trackSettings')
         handles.ValidateButt.Enable = 'on';
         trackSettings.tracked = 1;
     end
+end
+
+%Update GUI elements to take on previous values if tracking previously
+%terminated.
+if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') || exist([root,filesep,'Tracks.mat'],'file')
+    handles.PosCheck.Value = trackSettings.Centroid;
+    handles.VelCheck.Value = trackSettings.Velocity;
+    handles.LenCheck.Value = trackSettings.Length;
+    handles.AreaCheck.Value = trackSettings.Area;
+    handles.WidCheck.Value = trackSettings.Width;
+    handles.OriCheck.Value = trackSettings.Orientation;
+    handles.SF1Check.Value = trackSettings.SpareFeat1;
+    handles.SF2Check.Value = trackSettings.SpareFeat2;
+    handles.SF3Check.Value = trackSettings.SpareFeat3;
+    handles.SF4Check.Value = trackSettings.SpareFeat4;
+    
+    switch trackSettings.statsUse
+        case 'Centroid'
+            handles.CentOnlyRadio = 1;
+            handles.AllFeatRadio = 0;
+        case 'All'
+            handles.AllFeatRadio = 1;
+            handles.CentOnlyRadio = 0;
+    end
+    
+    handles.PropSlide.Value = trackSettings.incProp;
+    handles.AdaptSlide.Value = log10(trackSettings.tgtDensity);
+    handles.GapSlide.Value = trackSettings.gapWidth;
+    handles.FrameASlide.Value = trackSettings.frameA;
+    handles.TrackLenSlide.Value = trackSettings.minTrackLen;
+    
+    handles.PropEdit.String = num2str(trackSettings.incProp);
+    handles.AdaptEdit.String = num2str(trackSettings.tgtDensity);
+    handles.GapEdit.String = num2str(trackSettings.gapWidth);
+    handles.FrameLoEdit.String = num2str(trackSettings.minFrame);
+    handles.FrameAEdit.String = num2str(trackSettings.frameA);
+    handles.TrackLenEdit.String = num2str(trackSettings.minTrackLen);
+    handles.FrameHiEdit.String = num2str(trackSettings.maxFrame);
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -584,6 +622,7 @@ nextHand.rawFromMappings = rawFromMappings;
 nextHand.rawToMappings = rawToMappings;
 nextHand.rawTracks = rawTracks;
 nextHand.maxF = trackSettings.maxFrame;
+nextHand.minF = trackSettings.minFrame;
 nextHand.pxSize = trackSettings.pixSize;
 nextHand.root = root;
 

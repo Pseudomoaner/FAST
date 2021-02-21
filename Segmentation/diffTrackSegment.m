@@ -67,20 +67,24 @@ global segmentParams
 global frameCount
 global debugSet
 
-%Default settings
-segmentParams.Neighbourhood = 9;
-segmentParams.TextureThresh = 2;
-segmentParams.waterThresh = 1.75;
-segmentParams.ridgeThresh = 0.2;
-segmentParams.ridgeScale = 15;
-segmentParams.Ahigh = 2500;
-segmentParams.Alow = 100;
-segmentParams.RidgeAMin = 100;
-segmentParams.invert = false;
-segmentParams.overlay = 'Texture';
-segmentParams.segmentChan = 1;
-segmentParams.ridgeErosion = 0;
-segmentParams.t = 0;
+%Load previous segmentation settings if available, otherwise set default settings
+if exist(fullfile(root,'SegmentationSettings.mat'))
+    load(fullfile(root,'SegmentationSettings.mat'))
+else
+    segmentParams.Neighbourhood = 9;
+    segmentParams.TextureThresh = 2;
+    segmentParams.waterThresh = 1.75;
+    segmentParams.ridgeThresh = 0.2;
+    segmentParams.ridgeScale = 15;
+    segmentParams.Ahigh = 2500;
+    segmentParams.Alow = 100;
+    segmentParams.RidgeAMin = 100;
+    segmentParams.invert = false;
+    segmentParams.overlay = 'Texture';
+    segmentParams.segmentChan = 1;
+    segmentParams.ridgeErosion = 0;
+    segmentParams.t = 0;
+end
 
 root = varargin{1}.rootdir;
 debugSet = varargin{1}.debugSet;

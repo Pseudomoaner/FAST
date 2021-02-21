@@ -43,14 +43,23 @@ for cInd = 1:length(data)
     
     if ~isempty(tInd) %If cell is tracked in this frame, use the segmentation as a mask
         %Find colour cell should be marked as
-        if strcmp(overlaySettings.info,'Data') && tInd <= size(data(cInd).(overlaySettings.data),1) %Second condition can be true if you're looking at a higher-order measurement (e.g. velocity) and you're near the end of the track
-            thisDat = data(cInd).(overlaySettings.data)(tInd);
-            thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
-            if thisInd == 0
-                thisInd = 1;
+        if strcmp(overlaySettings.info,'Data') 
+            if strcmp(overlaySettings.data,'population') %Special case for population labels
+                thisDat = data(cInd).population;
+                thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
+                if thisInd == 0
+                    thisInd = 1;
+                end
+                thisCol = cmap(thisInd,:);
+            elseif tInd <= size(data(cInd).(overlaySettings.data),1) %This condition can be false if you're looking at a higher-order measurement (e.g. velocity) and you're near the end of the track
+                thisDat = data(cInd).(overlaySettings.data)(tInd);
+                thisInd = ceil((thisDat - minData)*size(cmap,1)/(maxData - minData));
+                if thisInd == 0
+                    thisInd = 1;
+                end
+                thisCol = cmap(thisInd,:);
             end
-            thisCol = cmap(thisInd,:);
-        elseif tInd <= size(data(cInd).(overlaySettings.data),1)
+        elseif tInd <= size(data(cInd).x,1)
             thisCol = colourmap(cInd,:);
         end
         

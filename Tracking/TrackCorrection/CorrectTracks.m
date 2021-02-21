@@ -71,6 +71,7 @@ rawFromMappings = varargin{1}.rawFromMappings;
 rawToMappings = varargin{1}.rawToMappings;
 rawTracks = varargin{1}.rawTracks;
 GUIsets.maxF = varargin{1}.maxF;
+GUIsets.minF = varargin{1}.minF;
 GUIsets.root = varargin{1}.root;
 GUIsets.pxSize = varargin{1}.pxSize;
 GUIsets.underlayDir = varargin{1}.underlayDir;
@@ -165,9 +166,9 @@ switch GUIsets.mode
             
             %Update rawToMappings
             for i = trackTimes{newTrack}
-                oldInd = rawToMappings{i}(:,1) == GUIsets.cutTrack;
-                rawToMappings{i}(oldInd,1) = newTrack;
-                rawToMappings{i}(oldInd,2) = i - trackTimes{newTrack}(1) + 1;
+                oldInd = rawToMappings{i - GUIsets.minF + 1}(:,1) == GUIsets.cutTrack;
+                rawToMappings{i - GUIsets.minF + 1}(oldInd,1) = newTrack;
+                rawToMappings{i - GUIsets.minF + 1}(oldInd,2) = i - trackTimes{newTrack}(1) + 1;
             end
             
             %Split rawFromMappings
@@ -409,23 +410,23 @@ if ID ~= 0
             GUIsets.cutID = ID;
             GUIsets.cutT = GUIsets.frame;
             
-            GUIsets.cutTrack = rawToMappings{GUIsets.frame}(ID,1);
-            GUIsets.cutPoint = rawToMappings{GUIsets.frame}(ID,2);
+            GUIsets.cutTrack = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,1);
+            GUIsets.cutPoint = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,2);
         case 'Fuse'
-            if GUIsets.IDswitch == 1 && rawToMappings{GUIsets.frame}(ID,2) == size(trackTimes{rawToMappings{GUIsets.frame}(ID,1)},2)
+            if GUIsets.IDswitch == 1 && rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,2) == size(trackTimes{rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,1)},2)
                 GUIsets.srcID = ID;
                 GUIsets.srcT = GUIsets.frame;
                 GUIsets.IDswitch = 2;
                 
-                GUIsets.srcTrack = rawToMappings{GUIsets.frame}(ID,1);
-                GUIsets.srcPoint = rawToMappings{GUIsets.frame}(ID,2);
-            elseif GUIsets.IDswitch == 2 && GUIsets.frame > GUIsets.srcT && rawToMappings{GUIsets.frame}(ID,2) == 1
+                GUIsets.srcTrack = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,1);
+                GUIsets.srcPoint = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,2);
+            elseif GUIsets.IDswitch == 2 && GUIsets.frame > GUIsets.srcT && rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,2) == 1
                 GUIsets.tgtID = ID;
                 GUIsets.tgtT = GUIsets.frame;
                 GUIsets.IDswitch = 1;
                 
-                GUIsets.tgtTrack = rawToMappings{GUIsets.frame}(ID,1);
-                GUIsets.tgtPoint = rawToMappings{GUIsets.frame}(ID,2);
+                GUIsets.tgtTrack = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,1);
+                GUIsets.tgtPoint = rawToMappings{GUIsets.frame - GUIsets.minF + 1}(ID,2);
             end
     end
 end
