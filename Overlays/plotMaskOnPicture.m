@@ -59,7 +59,7 @@ for cInd = 1:length(data)
                 end
                 thisCol = cmap(thisInd,:);
             end
-        elseif tInd <= size(data(cInd).(overlaySettings.data),1)
+        elseif tInd <= size(data(cInd).x,1)
             thisCol = colourmap(cInd,:);
         end
         
