@@ -472,7 +472,11 @@ plotTrackLengthDistribution(rawTracks.(trackDataNames{1}),handles.axes3,trackSet
 trackSettings.tracked = 1;
 handles.ValidateButt.Enable = 'on';
 
-save([root,filesep,'Tracks.mat'],'procTracks','rawFromMappings','rawToMappings','rawTracks','trackTimes','toMappings','fromMappings','trackSettings','trackableData','linkStats','-v7.3')
+if isdeployed
+    save([root,filesep,'Tracks.mat'],'procTracks','rawFromMappings','rawToMappings','rawTracks','trackTimes','toMappings','fromMappings','trackSettings','trackableData','linkStats','-v6')
+else
+    save([root,filesep,'Tracks.mat'],'procTracks','rawFromMappings','rawToMappings','rawTracks','trackTimes','toMappings','fromMappings','trackSettings','trackableData','linkStats','-v7.3')
+end
 
 debugprogressbar([1;1;1],debugSet);
 
@@ -1119,7 +1123,11 @@ if trackSettings.tracked
     
     %Do the track data processing in the background (once the track lengths have been plotted)
     [procTracks,fromMappings,toMappings] = processTracks(rawTracks,rawFromMappings,rawToMappings,trackSettings,trackTimes,debugSet);
-    save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-v7.3','-append')
+    if isdeployed
+        save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-v6','-append')
+    else
+        save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-v7.3','-append')
+    end
 
     debugprogressbar([1;1;1],debugSet)
 end
@@ -1172,7 +1180,12 @@ if trackSettings.tracked
     
     %Do the track data processing in the background (once the track lengths have been plotted)
     [procTracks,fromMappings,toMappings] = processTracks(rawTracks,rawFromMappings,rawToMappings,trackSettings,trackTimes,debugSet);
-    save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-append')
+    
+    if isdeployed
+        save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-append','-v6')
+    else
+        save([root,filesep,'Tracks.mat'],'procTracks','fromMappings','toMappings','-append','-v7.3')
+    end
 
     debugprogressbar([1;1;1],debugSet)
 end

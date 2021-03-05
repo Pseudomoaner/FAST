@@ -286,7 +286,11 @@ if customise
     end
 end
 
-save(cellFeaturesPath,'-v7.3','maxT','trackableData','featSettings')
+if isdeployed
+    save(cellFeaturesPath,'maxT','trackableData','featSettings','-v6')
+else
+    save(cellFeaturesPath,'maxT','trackableData','featSettings','-v7.3')
+end
 
 %If there is only one timepoint available, still want to make data
 %available for plotting and overlays. Convert to 'Tracks.mat' format for
@@ -344,7 +348,11 @@ if size(trackableData.(featNames{1}),1) == 1
     
     fromMappings = [];
     
-    save([root,filesep,'Tracks.mat'],'-v7.3','procTracks','trackSettings','toMappings','fromMappings')
+    if isdeployed
+        save([root,filesep,'Tracks.mat'],'procTracks','trackSettings','toMappings','fromMappings','-v6')
+    else
+        save([root,filesep,'Tracks.mat'],'procTracks','trackSettings','toMappings','fromMappings','-v7.3')
+    end
 end
 
 debugprogressbar(1,debugSet)
