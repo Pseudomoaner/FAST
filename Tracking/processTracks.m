@@ -118,7 +118,7 @@ for i = 1:length(rawTracks.(trackDataNames{1}))
             if size(rawTracks.ChannelMean{i},1) > 1
                 procTracks(i).(fieldName) = interp1(trackTimes{i},rawTracks.ChannelMean{i}(:,chan),trackTimes{i}(1):trackTimes{i}(end))';
             else
-                procTracks(i).(fieldName) = rawTracks.Channelmean{i}(:,chan);
+                procTracks(i).(fieldName) = rawTracks.ChannelMean{i}(:,chan);
             end
         end
     end
