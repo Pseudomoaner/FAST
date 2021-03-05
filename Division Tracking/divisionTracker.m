@@ -855,7 +855,11 @@ if divisionSettings.detected == 1
         end
     end
     
-    save([root,filesep,'Tracks.mat'],'divisionSettings','toMappings','fromMappings','procTracks','-append')
+    if isdeployed
+        save([root,filesep,'Tracks.mat'],'divisionSettings','toMappings','fromMappings','procTracks','-append','-v6')
+    else
+        save([root,filesep,'Tracks.mat'],'divisionSettings','toMappings','fromMappings','procTracks','-append','-v7.3')
+    end
     
     debugprogressbar(1,debugSet)
 end

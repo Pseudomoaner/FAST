@@ -712,7 +712,11 @@ global plotExport
 global plotSettings
 global root
 
-save([root,filesep,'plotDataExport.mat'],'plotExport','plotSettings')
+if isdeployed
+    save([root,filesep,'plotDataExport.mat'],'plotExport','plotSettings','-v6')
+else
+    save([root,filesep,'plotDataExport.mat'],'plotExport','plotSettings','-v7.3')
+end
 
 % --------------------------------------------------------------------
 function save_fig_Callback(hObject, eventdata, handles)

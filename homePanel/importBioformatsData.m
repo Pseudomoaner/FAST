@@ -153,4 +153,9 @@ end
 debugprogressbar([1;1],debugSet) %Make sure the modal loading bar has definitely closed
 
 metaName = [rootdir,filesep,'Metadata.mat'];
-save(metaName,'metaStore')
+
+if isdeployed
+    save(metaName,'metaStore','-v6')
+else
+    save(metaName,'metaStore','-v7.3')
+end

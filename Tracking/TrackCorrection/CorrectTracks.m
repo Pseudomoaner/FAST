@@ -476,9 +476,16 @@ global debugSet
 
 debugprogressbar(0,debugSet)
 
-save([GUIsets.root,filesep,'Tracks.mat'],'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append');
-if exist(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'file')
-    save(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append');
+if isdeployed
+    save([GUIsets.root,filesep,'Tracks.mat'],'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append','-v6');
+    if exist(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'file')
+        save(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append','-v6');
+    end
+else
+    save([GUIsets.root,filesep,'Tracks.mat'],'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append','-v7.3');
+    if exist(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'file')
+        save(fullfile(GUIsets.root,'Pre-division_Tracks.mat'),'rawFromMappings','rawToMappings','rawTracks','trackTimes','-append','-v7.3');
+    end
 end
 
 debugprogressbar(1,debugSet)
