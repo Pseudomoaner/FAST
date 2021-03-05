@@ -15,11 +15,19 @@ cellFeaturesPath = [root,filesep,'cellFeatures.mat'];
 
 load(cellFeaturesPath)
 
+%Correct maximal frame index, if this dataset is shorter than the one
+%originally analysed
+trackSettings.maxF = size(trackableData.Centroid,1);
+if trackSettings.maxFrame > size(trackableData.Centroid,1)
+    trackSettings.maxFrame = size(trackableData.Centroid,1);
+end
+debugSet = true;
+
 %Get the feature statistics and formatted feature matrices
 [linkStats,featMats,featureStruct,possIdx] = gatherLinkStats(trackableData,trackSettings,debugSet);
 
 %Do the actual tracking
-[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.gapWidth,false,0,debugSet);
+[Tracks,Initials] = doDirectLinkingRedux(featMats.lin,featMats.circ,featMats.lin,featMats.circ,linkStats,trackSettings.gapWidth,false,debugSet);
 
 progressbar(0);
 

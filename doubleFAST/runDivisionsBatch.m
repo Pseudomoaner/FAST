@@ -74,4 +74,4 @@ end
 
 save(tracksPath,'divisionSettings','toMappings','fromMappings','procTracks','-append')
 
-progressbar(1,debugSet)
+progressbar(1)
