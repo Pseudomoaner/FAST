@@ -22,7 +22,7 @@ function varargout = diffTrackSegment(varargin)
 
 % Edit the above text to modify the response to help diffTrackSegment
 
-% Last Modified by GUIDE v2.5 09-Sep-2019 11:08:13
+% Last Modified by GUIDE v2.5 13-Oct-2021 18:32:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,10 @@ global debugSet
 %Load previous segmentation settings if available, otherwise set default settings
 if exist(fullfile(root,'SegmentationSettings.mat'))
     load(fullfile(root,'SegmentationSettings.mat'))
+    
+    %Set display parameters to defaults
+    segmentParams.overlay = 'Texture';
+    segmentParams.t = 0;
 else
     segmentParams.Neighbourhood = 9;
     segmentParams.TextureThresh = 2;
@@ -84,6 +88,7 @@ else
     segmentParams.segmentChan = 1;
     segmentParams.ridgeErosion = 0;
     segmentParams.t = 0;
+    segmentParams.remHalos = false;
 end
 
 root = varargin{1}.rootdir;
@@ -122,6 +127,7 @@ handles.HAslider.Value = sqrt(segmentParams.Ahigh);
 handles.LAslider.Value = sqrt(segmentParams.Alow);
 handles.timeSlider.Value = segmentParams.t;
 handles.RAslider.Value = sqrt(segmentParams.RidgeAMin);
+handles.HaloCheck.Value = segmentParams.remHalos;
 
 %Sliders will activate as appropriate overlay is selected. Start off with texture overlay selected.
 handles.NHslider.Enable = 'on';
@@ -883,6 +889,19 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes on button press in HaloCheck.
+function HaloCheck_Callback(hObject, eventdata, handles)
+% hObject    handle to HaloCheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of HaloCheck
+global segmentParams
+
+segmentParams.remHalos = get(hObject,'Value');
+
+segmentImage(handles.axes1,false)
+
 function [] = segmentImage(axHand,init)
 global img
 global segmentParams
@@ -956,17 +975,17 @@ if strcmp(segmentParams.overlay,'Ridges')
     return
 end
 
-tempImg = and(Texture, ~Ridges);
+tempSeg = and(Texture, ~Ridges);
 
 %Apply a watershed transform to the image:
-dists = -bwdist(~tempImg);
+dists = -bwdist(~tempSeg);
 distA = imhmin(dists,segmentParams.waterThresh);
 distW = watershed(distA);
 
 if strcmp(segmentParams.overlay,'Watershed')
     waterSE = strel('disk',1);
-    binEdges = imdilate(bwmorph(tempImg,'remove'),waterSE);
-    newEdges = imdilate(and(distW == 0, tempImg),waterSE);
+    binEdges = imdilate(bwmorph(tempSeg,'remove'),waterSE);
+    newEdges = imdilate(and(distW == 0, tempSeg),waterSE);
     colorOver = cat(3,or(newEdges,binEdges),binEdges,zeros(size(distW)));
     overHand = imshow(colorOver,'parent',axHand);
     alpha = ~and(~newEdges,~binEdges);
@@ -975,12 +994,12 @@ if strcmp(segmentParams.overlay,'Watershed')
     return
 end
 
-tempImg(distW == 0) = 0;
+tempSeg(distW == 0) = 0;
 
 %Measure areas of each object, and remove those that are too
 %small.
 se = strel('disk',0);
-erodeImg = imerode(tempImg,se);
+erodeImg = imerode(tempSeg,se);
 RPs = regionprops(erodeImg,'PixelList','Area');
 NoCCs = size(RPs);
 usefulObjectsX = [];
@@ -991,12 +1010,32 @@ for i = 1:NoCCs(1)
         usefulObjectsY = [usefulObjectsY;RPs(i).PixelList(1,2)];
     end
 end
-tempImg = bwselect(tempImg,usefulObjectsX,usefulObjectsY,8);
+tempSeg = bwselect(tempSeg,usefulObjectsX,usefulObjectsY,8);
 
 %Clear boundary touching objects and assign a unique ID number to each segmented out cell
-% tempImg = imclearborder(tempImg,4);
-tempImg = imfill(tempImg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
-segment = bwlabel(tempImg,4);
+tempSeg = imclearborder(tempSeg,4);
+tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
+segment = bwlabel(tempSeg,4);
+
+%If requested, find the intensities of each object in this original
+%segmentation and apply a Gaussian-mixture model to split the high- from
+%low- intensity objects. Then delete any that are in the opposite peak from
+%what you are hoping to segment (e.g. if foreground colour is black, delete
+%any objects in the bright peak).
+if segmentParams.remHalos
+    objInts = zeros(max(segment(:)),1);
+    for i = 1:max(segment(:))
+        objInts(i) = mean(tempImg(segment(:) == i));
+    end
+    gmFit = fitgmdist(objInts,2);
+    thresh = mean(gmFit.mu);
+    remInds = find(objInts < thresh);
+    
+    for i = 1:size(remInds,1)
+        tempSeg(segment == remInds(i)) = 0;
+    end
+    segment = bwlabel(tempSeg);
+end
 
 if strcmp(segmentParams.overlay,'Segmentation')
     if sum(segment(:)) > 0 %If you've found at least one segmentation

@@ -75,7 +75,9 @@ for j = 1:gapSize
         %covariance matrix is poorly constrained (here, if there are fewer
         %objects in this frame than there are independent elements of the covariance
         %matrix), just run with a nearest neighbour approach. Should be
-        %sufficiently uncrowded for this to work.
+        %sufficiently uncrowded for this to work. Note this will not
+        %generate accepted or rejected links for plotting in the
+        %displacement space validation space.
         if j == 1 && (size(covDfs,2)*(size(covDfs,2)+1))/2 > size(fromLinFeatMats{i},1)
             pos1 = fromLinFeatMats{i}(:,2:3);
             pos2 = toLinFeatMats{i+j}(:,2:3);
@@ -101,7 +103,7 @@ for j = 1:gapSize
                 Tracks{i}(frame1Loc,2) = frame2Loc;
                 Initials{i+j}(frame2Loc) = 0;
                 
-                [~,minInd] = min(D(:));
+                [minD,minInd] = min(D(:));
             end
             debugprogressbar([0.4+((j-1)/gapSize)*0.2;(i-1)/(length(fromLinFeatMats) - j);1],debugSet)
         elseif ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
