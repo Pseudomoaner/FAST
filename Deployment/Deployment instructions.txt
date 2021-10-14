@@ -26,3 +26,8 @@ Part 3: Uploading the application
 1: Once files are compiled, upload the installer (in the for_redistribution folder) to the website via cPanel.
 2: Also upload the uncompiled files as a .zip (made in part 1).
 3: Update links on the home page, the installation page, and the installer page.
+
+PLATFORM SPECIFIC ISSUES
+Mac: The Macbook Pro I'm using is so old it doesn't support any version of the Matlab compiler newer than 2017a. You'll need to run the entire compilation using this version (or earlier).
+Ubuntu: To open Matlab from Terminal, type ./bin/matlab, after navigating to the matlab directory in /home/oli/Apps/.
+To run FAST once it has been installed from the command line, type /Path/To/FAST/application/run_FAST.sh /Path/To/MR/v95/, where /Path/To/FAST indicates the location where FAST was installed and /Path/To/MR indicates the location where the Matlab runtime was installed. 

@@ -57,19 +57,19 @@ for j = 1:noFrames
     %ridges that might have sneaked in
     Ridges = bwareaopen(Ridges,segmentParams.RidgeAMin);
     
-    tempImg = and(Texture, ~Ridges);
+    tempSeg = and(Texture, ~Ridges);
     
     %Apply a watershed transform to the image:
-    dists = -bwdist(~tempImg);
+    dists = -bwdist(~tempSeg);
     distA = imhmin(dists,segmentParams.waterThresh);
     distW = watershed(distA);
     
-    tempImg(distW == 0) = 0;
+    tempSeg(distW == 0) = 0;
     
     %Measure areas of each object, and remove those that are too
     %small.
     se = strel('disk',0);
-    erodeImg = imerode(tempImg,se);
+    erodeImg = imerode(tempSeg,se);
     RPs = regionprops(erodeImg,'PixelList','Area');
     NoCCs = size(RPs);
     usefulObjectsX = [];
@@ -80,12 +80,32 @@ for j = 1:noFrames
             usefulObjectsY = [usefulObjectsY;RPs(i).PixelList(1,2)];
         end
     end
-    tempImg = bwselect(tempImg,usefulObjectsX,usefulObjectsY,8);
+    tempSeg = bwselect(tempSeg,usefulObjectsX,usefulObjectsY,8);
     
     %Clear boundary touching objects and assign a unique ID number to each segmented out cell
-    tempImg = imclearborder(tempImg,4);
-    tempImg = imfill(tempImg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
-    segment = bwlabel(tempImg,4);
+    tempSeg = imclearborder(tempSeg,4);
+    tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
+    segment = bwlabel(tempSeg,4);
+    
+    %If requested, find the intensities of each object in this original
+    %segmentation and apply a Gaussian-mixture model to split the high- from
+    %low- intensity objects. Then delete any that are in the opposite peak from
+    %what you are hoping to segment (e.g. if foreground colour is black, delete
+    %any objects in the bright peak).
+    if segmentParams.remHalos
+        objInts = zeros(max(segment(:)),1);
+        for i = 1:max(segment(:))
+            objInts(i) = mean(tempImg(segment(:) == i));
+        end
+        gmFit = fitgmdist(objInts,2);
+        thresh = mean(gmFit.mu);
+        remInds = find(objInts < thresh);
+        
+        for i = 1:size(remInds,1)
+            tempSeg(segment == remInds(i)) = 0;
+        end
+        segment = bwlabel(tempSeg);
+    end
     
     %Save the segmentation
     frameFName = [outDir,sprintf('Frame_%04d.tif',currFrame)];

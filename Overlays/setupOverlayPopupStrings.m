@@ -76,7 +76,7 @@ if overlaySettings.pseudoTracks
     minLen = 1;
     minLenInd = 1;
 else %Find the index of the first track that is long enough to be included
-    minLen = 5;
+    minLen = 3;
     minLenInd = [];
     for i = 1:size(tracks,2)
         if minLen < size(tracks(i).x,1)-1
