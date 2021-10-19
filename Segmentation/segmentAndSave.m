@@ -83,8 +83,12 @@ for j = 1:noFrames
             for i = 1:max(segment(:))
                 objInts(i) = mean(tempImg(segment(:) == i));
             end
-            gmFit = fitgmdist(objInts,2);
-            thresh = mean(gmFit.mu);
+            try
+                gmFit = fitgmdist(objInts,2);
+                thresh = mean(gmFit.mu);
+            catch %An error indicates that there is only one example of one of the populations in your sample; in that case (usually at very low cell numbers), should be safe to use the mean of all intensities as your threshold.
+                thresh = mean(objInts);
+            end
             remInds = find(objInts < thresh);
             
             for i = 1:size(remInds,1)
