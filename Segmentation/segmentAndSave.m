@@ -6,7 +6,7 @@ function [] = segmentAndSave(root,debugSet,noFrames,segmentParams)
 %       -root: String specifying the root of the currently selected data directory
 %       -debugSet: Whether FAST is currently in debug mode (true if so,
 %       false if not).
-%       -noFrames: Integer specifying the total number of frames in the 
+%       -noFrames: Integer specifying the total number of frames in the
 %       currently selected dataset.
 %       -segmentParams: Structure of parameters chosen within FAST's segmentation GUI,
 %       specifying the options used during the segmentation routine.
@@ -66,26 +66,9 @@ for j = 1:noFrames
     
     tempSeg(distW == 0) = 0;
     
-    %Measure areas of each object, and remove those that are too
-    %small.
-    se = strel('disk',0);
-    erodeImg = imerode(tempSeg,se);
-    RPs = regionprops(erodeImg,'PixelList','Area');
-    NoCCs = size(RPs);
-    usefulObjectsX = [];
-    usefulObjectsY = [];
-    for i = 1:NoCCs(1)
-        if RPs(i).Area > segmentParams.Alow && RPs(i).Area < segmentParams.Ahigh
-            usefulObjectsX = [usefulObjectsX;RPs(i).PixelList(1,1)]; %Conveniently eliminates any cells that do not have a centroid within the boundary of the cell - weird, curvy cells or joined cells.
-            usefulObjectsY = [usefulObjectsY;RPs(i).PixelList(1,2)];
-        end
-    end
-    tempSeg = bwselect(tempSeg,usefulObjectsX,usefulObjectsY,8);
-    
     %Clear boundary touching objects and assign a unique ID number to each segmented out cell
     tempSeg = imclearborder(tempSeg,4);
     tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
-    segment = bwlabel(tempSeg,4);
     
     %If requested, find the intensities of each object in this original
     %segmentation and apply a Gaussian-mixture model to split the high- from
@@ -93,19 +76,85 @@ for j = 1:noFrames
     %what you are hoping to segment (e.g. if foreground colour is black, delete
     %any objects in the bright peak).
     if segmentParams.remHalos
-        objInts = zeros(max(segment(:)),1);
-        for i = 1:max(segment(:))
-            objInts(i) = mean(tempImg(segment(:) == i));
-        end
-        gmFit = fitgmdist(objInts,2);
-        thresh = mean(gmFit.mu);
-        remInds = find(objInts < thresh);
+        segment = bwlabel(tempSeg,4);
         
-        for i = 1:size(remInds,1)
-            tempSeg(segment == remInds(i)) = 0;
+        if max(segment(:)) > 1 %Must be more than one object in segmentation, otherwise fitgmdist will complain
+            objInts = zeros(max(segment(:)),1);
+            for i = 1:max(segment(:))
+                objInts(i) = mean(tempImg(segment(:) == i));
+            end
+            gmFit = fitgmdist(objInts,2);
+            thresh = mean(gmFit.mu);
+            remInds = find(objInts < thresh);
+            
+            for i = 1:size(remInds,1)
+                tempSeg(segment == remInds(i)) = 0;
+            end
+            segment = bwlabel(tempSeg);
         end
-        segment = bwlabel(tempSeg);
     end
+    
+    %Measure areas of each object, and mark those that are too
+    %small
+    se = strel('disk',0);
+    erodeImg = imerode(tempSeg,se);
+    RPs = regionprops(erodeImg,'PixelList','Area');
+    NoCCs = size(RPs);
+    keepObjsX = [];
+    keepObjsY = [];
+    for i = 1:NoCCs(1)
+        if RPs(i).Area > segmentParams.Alow
+            keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+            keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+        end
+    end
+    tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+    
+    %If recursive watershed is selected, apply watershed algorithm repeatedly with
+    %decreasing stringency to large objects. Otherwise, remove large objects directly.
+    if segmentParams.waterRecur
+        loopCnt = 1;
+        stepRes = 4; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
+        
+        allAreas = vertcat(RPs.Area);
+        tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
+        while sum(tgtObjs) > 0
+            %Apply more stringent watershed to currently too large objects
+            for i = 1:size(RPs,1)
+                if tgtObjs(i)
+                    subObj = bwselect(tempSeg,RPs(i).PixelList(1,1),RPs(i).PixelList(1,2));
+                    dists = -bwdist(~subObj);
+                    distA = imhmin(dists,segmentParams.waterThresh - loopCnt/stepRes);
+                    distW = watershed(distA);
+                    
+                    tempSeg(and(distW == 0,subObj)) = 0;
+                end
+            end
+            
+            %Recalculate area list with re-segmented objects.
+            erodeImg = imerode(tempSeg,se);
+            RPs = regionprops(erodeImg,'PixelList','Area');
+            allAreas = vertcat(RPs.Area);
+            tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
+            
+            loopCnt = loopCnt + 1;
+        end
+    else
+        RPs = regionprops(erodeImg,'PixelList','Area');
+        NoCCs = size(RPs);
+        keepObjsX = [];
+        keepObjsY = [];
+        for i = 1:NoCCs(1)
+            if RPs(i).Area < segmentParams.Ahigh
+                keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+                keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+            end
+        end
+        tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+    end
+    
+    %Do final labelling of each object
+    segment = bwlabel(tempSeg);
     
     %Save the segmentation
     frameFName = [outDir,sprintf('Frame_%04d.tif',currFrame)];

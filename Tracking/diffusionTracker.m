@@ -226,6 +226,7 @@ if exist(fullfile(root,'Pre-division_Tracks.mat'),'file') %If you've run divisio
     load(fullfile(root,'Pre-division_Tracks.mat'),'trackableData','rawTracks','trackTimes','rawToMappings','rawFromMappings','trackSettings')
     handles.ValidateButt.Enable = 'on';
     trackSettings.tracked = 1;
+    trackSettings.calculated = 0; %Don't actually load the link statistics - will need to recalculate these
     
     %Make sure to immediately go back to the pre-division detection file
     %structure, to avoid issues if the module is terminated early
@@ -237,6 +238,7 @@ elseif exist([root,filesep,'Tracks.mat'],'file')
         load([root,filesep,'Tracks.mat'],'rawTracks','trackTimes','rawToMappings','rawFromMappings','trackSettings')
         handles.ValidateButt.Enable = 'on';
         trackSettings.tracked = 1;
+        trackSettings.calculated = 0; %Don't actually load the link statistics - will need to recalculate these
     end
 end
 

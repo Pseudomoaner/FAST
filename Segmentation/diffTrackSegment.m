@@ -22,7 +22,7 @@ function varargout = diffTrackSegment(varargin)
 
 % Edit the above text to modify the response to help diffTrackSegment
 
-% Last Modified by GUIDE v2.5 13-Oct-2021 18:32:43
+% Last Modified by GUIDE v2.5 18-Oct-2021 12:13:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -89,6 +89,7 @@ else
     segmentParams.ridgeErosion = 0;
     segmentParams.t = 0;
     segmentParams.remHalos = false;
+    segmentParams.waterRecur = false;
 end
 
 root = varargin{1}.rootdir;
@@ -127,7 +128,8 @@ handles.HAslider.Value = sqrt(segmentParams.Ahigh);
 handles.LAslider.Value = sqrt(segmentParams.Alow);
 handles.timeSlider.Value = segmentParams.t;
 handles.RAslider.Value = sqrt(segmentParams.RidgeAMin);
-handles.HaloCheck.Value = segmentParams.remHalos;
+handles.haloRemCheck.Value = segmentParams.remHalos;
+handles.waterRecCheck.Value = segmentParams.waterRecur;
 
 %Sliders will activate as appropriate overlay is selected. Start off with texture overlay selected.
 handles.NHslider.Enable = 'on';
@@ -889,18 +891,34 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-% --- Executes on button press in HaloCheck.
-function HaloCheck_Callback(hObject, eventdata, handles)
-% hObject    handle to HaloCheck (see GCBO)
+
+% --- Executes on button press in haloRemCheck.
+function haloRemCheck_Callback(hObject, eventdata, handles)
+% hObject    handle to haloRemCheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of HaloCheck
+% Hint: get(hObject,'Value') returns toggle state of haloRemCheck
 global segmentParams
 
 segmentParams.remHalos = get(hObject,'Value');
 
 segmentImage(handles.axes1,false)
+
+
+% --- Executes on button press in recWaterCheck.
+function recWaterCheck_Callback(hObject, eventdata, handles)
+% hObject    handle to recWaterCheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of recWaterCheck
+global segmentParams
+
+segmentParams.waterRecur = get(hObject,'Value');
+
+segmentImage(handles.axes1,false)
+
 
 function [] = segmentImage(axHand,init)
 global img
@@ -996,26 +1014,9 @@ end
 
 tempSeg(distW == 0) = 0;
 
-%Measure areas of each object, and remove those that are too
-%small.
-se = strel('disk',0);
-erodeImg = imerode(tempSeg,se);
-RPs = regionprops(erodeImg,'PixelList','Area');
-NoCCs = size(RPs);
-usefulObjectsX = [];
-usefulObjectsY = [];
-for i = 1:NoCCs(1)
-    if RPs(i).Area > segmentParams.Alow && RPs(i).Area < segmentParams.Ahigh
-        usefulObjectsX = [usefulObjectsX;RPs(i).PixelList(1,1)]; %Conveniently eliminates any cells that do not have a centroid within the boundary of the cell - weird, curvy cells or joined cells.
-        usefulObjectsY = [usefulObjectsY;RPs(i).PixelList(1,2)];
-    end
-end
-tempSeg = bwselect(tempSeg,usefulObjectsX,usefulObjectsY,8);
-
 %Clear boundary touching objects and assign a unique ID number to each segmented out cell
 tempSeg = imclearborder(tempSeg,4);
 tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
-segment = bwlabel(tempSeg,4);
 
 %If requested, find the intensities of each object in this original
 %segmentation and apply a Gaussian-mixture model to split the high- from
@@ -1023,19 +1024,84 @@ segment = bwlabel(tempSeg,4);
 %what you are hoping to segment (e.g. if foreground colour is black, delete
 %any objects in the bright peak).
 if segmentParams.remHalos
-    objInts = zeros(max(segment(:)),1);
-    for i = 1:max(segment(:))
-        objInts(i) = mean(tempImg(segment(:) == i));
-    end
-    gmFit = fitgmdist(objInts,2);
-    thresh = mean(gmFit.mu);
-    remInds = find(objInts < thresh);
+    segment = bwlabel(tempSeg,4);
     
-    for i = 1:size(remInds,1)
-        tempSeg(segment == remInds(i)) = 0;
+    if max(segment(:)) > 1 %Must be more than one object in segmentation, otherwise fitgmdist will complain
+        objInts = zeros(max(segment(:)),1);
+        for i = 1:max(segment(:))
+            objInts(i) = mean(tempImg(segment(:) == i));
+        end
+        gmFit = fitgmdist(objInts,2);
+        thresh = mean(gmFit.mu);
+        remInds = find(objInts < thresh);
+        
+        for i = 1:size(remInds,1)
+            tempSeg(segment == remInds(i)) = 0;
+        end
     end
-    segment = bwlabel(tempSeg);
 end
+
+%Measure areas of each object, and mark those that are too
+%small
+se = strel('disk',0);
+erodeImg = imerode(tempSeg,se);
+RPs = regionprops(erodeImg,'PixelList','Area');
+NoCCs = size(RPs);
+keepObjsX = [];
+keepObjsY = [];
+for i = 1:NoCCs(1)
+    if RPs(i).Area > segmentParams.Alow
+        keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+        keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+    end
+end
+tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+
+%If recursive watershed is selected, apply watershed algorithm repeatedly with
+%decreasing stringency to large objects. Otherwise, remove large objects directly.
+if segmentParams.waterRecur
+    loopCnt = 1;
+    stepRes = 4; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
+    
+    allAreas = vertcat(RPs.Area);
+    tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
+    while sum(tgtObjs) > 0
+        %Apply more stringent watershed to currently too large objects
+        for i = 1:size(RPs,1)
+            if tgtObjs(i)
+                subObj = bwselect(tempSeg,RPs(i).PixelList(1,1),RPs(i).PixelList(1,2));
+                dists = -bwdist(~subObj);
+                distA = imhmin(dists,segmentParams.waterThresh - loopCnt/stepRes);
+                distW = watershed(distA);
+                
+                tempSeg(and(distW == 0,subObj)) = 0;
+            end
+        end
+        
+        %Recalculate area list with re-segmented objects.
+        erodeImg = imerode(tempSeg,se);
+        RPs = regionprops(erodeImg,'PixelList','Area');
+        allAreas = vertcat(RPs.Area);
+        tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
+        
+        loopCnt = loopCnt + 1;
+    end
+else
+    RPs = regionprops(erodeImg,'PixelList','Area');
+    NoCCs = size(RPs);
+    keepObjsX = [];
+    keepObjsY = [];
+    for i = 1:NoCCs(1)
+        if RPs(i).Area < segmentParams.Ahigh
+            keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+            keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+        end
+    end
+    tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+end
+
+%Do final labelling of each object
+segment = bwlabel(tempSeg);
 
 if strcmp(segmentParams.overlay,'Segmentation')
     if sum(segment(:)) > 0 %If you've found at least one segmentation
