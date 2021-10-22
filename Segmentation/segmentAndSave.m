@@ -22,54 +22,54 @@ end
 debugprogressbar(0,debugSet);
 
 for j = 1:noFrames
-    
+
     %Get brightfield image data
     currFrame = j - 1;
     img = double(imread([inDir,sprintf('Frame_%04d.tif',currFrame)]));
-    
+
     %Set parameters
     MedFiltSize = 5;
-    
+
     %Apply a median filter
     tempImg = medfilt2(img(:,:),[MedFiltSize,MedFiltSize]);
-    
+
     if segmentParams.invert
         tempImg = max(tempImg(:))-tempImg;
     end
-    
+
     %Apply texture analysis
     stdImg = stdfilt(tempImg,ones(segmentParams.Neighbourhood));
     kernel = ones(segmentParams.Neighbourhood) / segmentParams.Neighbourhood^2; % Mean kernel
     meanImg = conv2(tempImg, kernel, 'same'); % Convolve keeping size of I
     seImg = stdImg./(meanImg.^0.5); %Logic here is that dividing by meanImg gives COV. However, the COV itself scales as one over the square root of the image intensity (shot noise), so multiply by that number to get just the contribution from the cells.
     Texture = seImg > segmentParams.TextureThresh;
-    
+
     seStre = strel('disk',(segmentParams.Neighbourhood-1)/2);
     Texture = imerode(Texture,seStre);
-    
+
     %Do ridge-detection segmentation
     Ridges = bwRidgeCenterMod(tempImg,segmentParams.ridgeScale,segmentParams.ridgeThresh);
     se = strel('disk',segmentParams.ridgeErosion);
     Ridges = imerode(Ridges,se);
     Ridges = imdilate(Ridges,se);
-    
+
     %Adjust the Ridges image to remove any tiny, disconnected bits of
     %ridges that might have sneaked in
     Ridges = bwareaopen(Ridges,segmentParams.RidgeAMin);
-    
+
     tempSeg = and(Texture, ~Ridges);
-    
+
     %Apply a watershed transform to the image:
     dists = -bwdist(~tempSeg);
     distA = imhmin(dists,segmentParams.waterThresh);
     distW = watershed(distA);
-    
+
     tempSeg(distW == 0) = 0;
-    
+
     %Clear boundary touching objects and assign a unique ID number to each segmented out cell
     tempSeg = imclearborder(tempSeg,4);
     tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
-    
+
     %If requested, find the intensities of each object in this original
     %segmentation and apply a Gaussian-mixture model to split the high- from
     %low- intensity objects. Then delete any that are in the opposite peak from
@@ -77,7 +77,7 @@ for j = 1:noFrames
     %any objects in the bright peak).
     if segmentParams.remHalos
         segment = bwlabel(tempSeg,4);
-        
+
         if max(segment(:)) > 1 %Must be more than one object in segmentation, otherwise fitgmdist will complain
             objInts = zeros(max(segment(:)),1);
             for i = 1:max(segment(:))
@@ -90,14 +90,14 @@ for j = 1:noFrames
                 thresh = mean(objInts);
             end
             remInds = find(objInts < thresh);
-            
+
             for i = 1:size(remInds,1)
                 tempSeg(segment == remInds(i)) = 0;
             end
             segment = bwlabel(tempSeg);
         end
     end
-    
+
     %Measure areas of each object, and mark those that are too
     %small
     se = strel('disk',0);
@@ -113,57 +113,59 @@ for j = 1:noFrames
         end
     end
     tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
-    
+
     %If recursive watershed is selected, apply watershed algorithm repeatedly with
     %decreasing stringency to large objects. Otherwise, remove large objects directly.
     if segmentParams.waterRecur
         loopCnt = 1;
-        stepRes = 4; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
-        
+        stepRes = 1.15; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
+
         allAreas = vertcat(RPs.Area);
         tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
-        while sum(tgtObjs) > 0
+
+        newThresh = (segmentParams.waterThresh/(stepRes^loopCnt));
+        while sum(tgtObjs) > 0 && newThresh > 0.4
             %Apply more stringent watershed to currently too large objects
             for i = 1:size(RPs,1)
                 if tgtObjs(i)
                     subObj = bwselect(tempSeg,RPs(i).PixelList(1,1),RPs(i).PixelList(1,2));
                     dists = -bwdist(~subObj);
-                    distA = imhmin(dists,segmentParams.waterThresh - loopCnt/stepRes);
+                    distA = imhmin(dists,newThresh);
                     distW = watershed(distA);
-                    
+
                     tempSeg(and(distW == 0,subObj)) = 0;
                 end
             end
-            
+
             %Recalculate area list with re-segmented objects.
             erodeImg = imerode(tempSeg,se);
             RPs = regionprops(erodeImg,'PixelList','Area');
             allAreas = vertcat(RPs.Area);
             tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
-            
+
             loopCnt = loopCnt + 1;
+            newThresh = (segmentParams.waterThresh/(stepRes^loopCnt));
         end
-    else
-        RPs = regionprops(erodeImg,'PixelList','Area');
-        NoCCs = size(RPs);
-        keepObjsX = [];
-        keepObjsY = [];
-        for i = 1:NoCCs(1)
-            if RPs(i).Area < segmentParams.Ahigh
-                keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
-                keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
-            end
-        end
-        tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
     end
-    
+    RPs = regionprops(erodeImg,'PixelList','Area');
+    NoCCs = size(RPs);
+    keepObjsX = [];
+    keepObjsY = [];
+    for i = 1:NoCCs(1)
+        if RPs(i).Area < segmentParams.Ahigh
+            keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+            keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+        end
+    end
+    tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+
     %Do final labelling of each object
     segment = bwlabel(tempSeg);
-    
+
     %Save the segmentation
     frameFName = [outDir,sprintf('Frame_%04d.tif',currFrame)];
     imwrite(segment,frameFName);
-    
+
     %Update the user
     debugprogressbar(j/noFrames,debugSet);
 end

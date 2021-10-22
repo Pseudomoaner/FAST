@@ -53,7 +53,7 @@ function homePanel_OpeningFcn(hObject, eventdata, handles, varargin)
 global rootdir
 global debugSet
 
-debugSet = false; %If set to true, prevents windows from becoming modal. This allows you to stop commands much more easily with Ctrl-C, rather than having to wait for them to finish running.
+debugSet = true; %If set to true, prevents windows from becoming modal. This allows you to stop commands much more easily with Ctrl-C, rather than having to wait for them to finish running.
 
 % Choose default command line output for homePanel
 handles.output = hObject;

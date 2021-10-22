@@ -118,50 +118,52 @@ for j = 1:noFrames
         end
     end
     tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
-    
+
     %If recursive watershed is selected, apply watershed algorithm repeatedly with
     %decreasing stringency to large objects. Otherwise, remove large objects directly.
     if segmentParams.waterRecur
         loopCnt = 1;
-        stepRes = 4; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
-        
+        stepRes = 1.15; %Controls how fine the step size of the recursive refinement of the watershed threshold should be.
+
         allAreas = vertcat(RPs.Area);
         tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
-        while sum(tgtObjs) > 0
+
+        newThresh = (segmentParams.waterThresh/(stepRes^loopCnt));
+        while sum(tgtObjs) > 0 && newThresh > 0.4
             %Apply more stringent watershed to currently too large objects
             for i = 1:size(RPs,1)
                 if tgtObjs(i)
                     subObj = bwselect(tempSeg,RPs(i).PixelList(1,1),RPs(i).PixelList(1,2));
                     dists = -bwdist(~subObj);
-                    distA = imhmin(dists,segmentParams.waterThresh - loopCnt/stepRes);
+                    distA = imhmin(dists,newThresh);
                     distW = watershed(distA);
-                    
+
                     tempSeg(and(distW == 0,subObj)) = 0;
                 end
             end
-            
+
             %Recalculate area list with re-segmented objects.
             erodeImg = imerode(tempSeg,se);
             RPs = regionprops(erodeImg,'PixelList','Area');
             allAreas = vertcat(RPs.Area);
             tgtObjs = allAreas > segmentParams.Ahigh; %All objects that are currently too big
-            
+
             loopCnt = loopCnt + 1;
+            newThresh = (segmentParams.waterThresh/(stepRes^loopCnt));
         end
-    else
-        RPs = regionprops(erodeImg,'PixelList','Area');
-        NoCCs = size(RPs);
-        keepObjsX = [];
-        keepObjsY = [];
-        for i = 1:NoCCs(1)
-            if RPs(i).Area < segmentParams.Ahigh
-                keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
-                keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
-            end
-        end
-        tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
     end
-    
+    RPs = regionprops(erodeImg,'PixelList','Area');
+    NoCCs = size(RPs);
+    keepObjsX = [];
+    keepObjsY = [];
+    for i = 1:NoCCs(1)
+        if RPs(i).Area < segmentParams.Ahigh
+            keepObjsX = [keepObjsX;RPs(i).PixelList(1,1)];
+            keepObjsY = [keepObjsY;RPs(i).PixelList(1,2)];
+        end
+    end
+    tempSeg = bwselect(tempSeg,keepObjsX,keepObjsY,8);
+
     %Do final labelling of each object
     segment = bwlabel(tempSeg);
     
