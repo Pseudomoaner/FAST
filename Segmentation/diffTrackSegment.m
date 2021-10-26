@@ -22,7 +22,7 @@ function varargout = diffTrackSegment(varargin)
 
 % Edit the above text to modify the response to help diffTrackSegment
 
-% Last Modified by GUIDE v2.5 18-Oct-2021 12:13:37
+% Last Modified by GUIDE v2.5 26-Oct-2021 12:19:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,6 +74,15 @@ if exist(fullfile(root,'SegmentationSettings.mat'))
     %Set display parameters to defaults
     segmentParams.overlay = 'Texture';
     segmentParams.t = 0;
+
+    %Deals with compatability issues for datasets analysed with previous
+    %versions of FAST
+    if ~isfield(segmentParams,remHalos)
+        segmentParams.remHalos = 0;
+    end
+    if ~isfield(segmentParams,waterRecur)
+        segmentParams.waterRecur = 0;
+    end
 else
     segmentParams.Neighbourhood = 9;
     segmentParams.TextureThresh = 2;
