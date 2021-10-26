@@ -76,7 +76,22 @@ try
     end
 catch
     debugprogressbar([1;1],debugSet) %Make sure the modal loading bar has definitely closed
-    hErr = errordlg('This file does not appear to be readable by Bioformats. Please try again.','Bioformats import error');
+    % Common problem is that the bioformats .jar file isn't available;
+    % check if this is the case and indicate if so with a special error
+    % message
+
+    %Folder in which this homepanel code is running
+    codeName = mfilename('fullpath');
+
+    slashLocs = regexp(codeName,filesep);
+    codeRoot = codeName(1:slashLocs(end));
+    jarName = [codeRoot,'bfmatlab',filesep,'bioformats_package.jar'];
+    if exist(jarName,'file')
+        hErr = errordlg('bioformats_package.jar file does not seem to be available. Please ensure this is placed in \FAST\homePanel\bfmatlab and try again.');
+    else
+        % Otherwise, throw generic message
+        hErr = errordlg('This file does not appear to be readable by Bioformats. Please try again.','Bioformats import error');
+    end
     uiwait(hErr);
     return
 end
