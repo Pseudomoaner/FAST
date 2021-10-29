@@ -77,10 +77,10 @@ if exist(fullfile(root,'SegmentationSettings.mat'))
 
     %Deals with compatability issues for datasets analysed with previous
     %versions of FAST
-    if ~isfield(segmentParams,remHalos)
+    if ~isfield(segmentParams,'remHalos')
         segmentParams.remHalos = 0;
     end
-    if ~isfield(segmentParams,waterRecur)
+    if ~isfield(segmentParams,'waterRecur')
         segmentParams.waterRecur = 0;
     end
 else
