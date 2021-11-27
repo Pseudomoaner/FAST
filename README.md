@@ -16,6 +16,6 @@ Have you struggled with automated measurement of the movement of many closely-pa
 
 **Please note that FAST depends on Bio-Formats for full functionality.** To use FAST from the code available here, please download the latest version of [Bio-Formats for Matlab](https://www.openmicroscopy.org/bio-formats/downloads/) and add the bioformats_package.jar file to your homePanel/bfmatlab folder. Alternatively, you can download a pre-packaged version of FAST from [the wiki](https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php?id=setup:installation).
 
-A publication detailing the implementation and functionality of FAST is currently under preparation. In the mean time, if you find this software useful, please cite our publication:
+A publication detailing the implementation and functionality of FAST is currently under preparation. In the mean time, if you find this software useful, please cite our preprint:
 
-Meacock, O. J, Doostmohammadi, A, Foster, K. R, Yeomans, J. M, Durham, W. M, **Bacteria solve the problem of crowding by moving slowly**, Nat. Phys. (2021) **17** pp 205-210, doi: https://doi.org/10.1038/s41567-020-01070-6
+Meacock, O. J, Durham, W. M, **Tracking bacteria at high density with FAST, the Feature-Assisted Segmenter/Tracker**, bioRxiv (2021), doi: https://doi.org/10.1101/2021.11.26.470050
