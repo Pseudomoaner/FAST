@@ -1025,7 +1025,10 @@ tempSeg(distW == 0) = 0;
 
 %Clear boundary touching objects and assign a unique ID number to each segmented out cell
 tempSeg = imclearborder(tempSeg,4);
-tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might appear in the cells as a result of ridge detection.
+% tempSeg = imfill(tempSeg,'holes'); %Also fill in any holes that might
+% appear in the cells as a result of ridge detection. Removed in latest
+% version, since it ends up clearing out any patches of cells surrounded by
+% halos in phase-contrast images.
 
 %If requested, find the intensities of each object in this original
 %segmentation and apply a Gaussian-mixture model to split the high- from
