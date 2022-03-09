@@ -72,6 +72,17 @@ for cInd = 1:length(data)
         elseif data(cInd).interpolated(tInd) == 0
             segmentID = centIDs(and(and(centres(:,1) < xPx + localTol,centres(:,1) > xPx - localTol),and(centres(:,2) < yPx + localTol,centres(:,2) > yPx - localTol)));
             
+            %Very very occasionally this detects two objects. If it does,
+            %pick the one that was closest to the target.
+            if numel(segmentID) > 1
+                xDist = centres(segmentID,1) - xPx;
+                yDist = centres(segmentID,2) - yPx;
+
+                [~,minInd] = min(sqrt(xDist.^2 + yDist.^2));
+
+                segmentID = segmentID(minInd);
+            end
+
             oneCell = segFrame == segmentID;
             bound = bwperim(oneCell);
             
