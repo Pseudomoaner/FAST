@@ -28,13 +28,19 @@ function [covDfs,covFs,linMs,circMs,trackability] = getScalingFactors(linFeatMat
 %   Author: Oliver J. Meacock (c) 2019
 
 %Find the full range of values that each of the linear variables can take
-allFeats = [];
+linFeats = [];
+circFeats = [];
 for i = 1:length(linFeatMats)
-    allFeats = [allFeats;linFeatMats{i}(:,2:end),circFeatMats{i}(:,2:end)];
+    linFeats = [linFeats;linFeatMats{i}(:,2:end)];
+    circFeats = [circFeats;circFeatMats{i}(:,2:end)];
 end
-minFeats = min(allFeats(:,1:size(linFeatMats{1},2)-1),[],1);
-maxFeats = max(allFeats(:,1:size(linFeatMats{1},2)-1),[],1);
+allFeats = [linFeats,circFeats];
+minFeats = min(allFeats(:,1:size(allFeats,2)-1),[],1);
+maxFeats = max(allFeats(:,1:size(allFeats,2)-1),[],1);
+
 noFeats = size(allFeats,2);
+noLinFeats = size(linFeats,2);
+noCircFeats = size(circFeats,2);
 
 groupedMat = [];
 
@@ -75,8 +81,8 @@ for i = 1:length(linFeatMats) - 1 %Loop over time indices
 end
 
 %Extract the multivariate statistics required by later sections
-linMs = zeros(length(linFeatMats) - 1,size(linFeatMats{1},2) - 1);
-circMs = zeros(length(linFeatMats) - 1,size(circFeatMats{1},2) - 1);
+linMs = zeros(length(linFeatMats) - 1,noLinFeats);
+circMs = zeros(length(linFeatMats) - 1,noCircFeats);
 covDfs = zeros(length(linFeatMats) - 1,noFeats,noFeats);
 covFs = zeros(length(linFeatMats) - 1,noFeats,noFeats);
 trackability = zeros(length(linFeatMats) - 1,1);
@@ -107,13 +113,13 @@ for i = 1:size(linFeatMats,1) - 1 %Loop over time again
         badInds = [];
         for j = goodSubInds
             %f (instantaneous feature positions)
-            goodSubFeatures(j,1:size(linFeatMats{1},2)-1) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
-            goodSubFeatures(j,size(linFeatMats{1},2):end) = circFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
+            goodSubFeatures(j,1:noLinFeats) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
+            goodSubFeatures(j,noLinFeats+1:end) = circFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end);
             
             %Delta f (feature displacements)
-            goodSubFeatureDiffs(j,1:size(linFeatMats{1},2)-1) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end) - linFeatMats{goodSubFrameNo(j)+1}(goodSubF2(j),2:end);
+            goodSubFeatureDiffs(j,1:noLinFeats) = linFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end) - linFeatMats{goodSubFrameNo(j)+1}(goodSubF2(j),2:end);
             circSubDiff = circFeatMats{goodSubFrameNo(j)}(goodSubF1(j),2:end) - circFeatMats{goodSubFrameNo(j)+1}(goodSubF2(j),2:end);
-            goodSubFeatureDiffs(j,size(linFeatMats{1},2):end) = mod(circSubDiff + 0.5,1) - 0.5;
+            goodSubFeatureDiffs(j,noLinFeats+1:end) = mod(circSubDiff + 0.5,1) - 0.5;
             
             if sum(isnan(goodSubFeatureDiffs(j,:)))>0 %If you've got any NaNs in this frame, exclude them (can occur if you have badly extracted object features)
                 badInds = [badInds;j];
@@ -127,8 +133,8 @@ for i = 1:size(linFeatMats,1) - 1 %Loop over time again
         covFs(i,:,:) = cov(goodSubFeatures);
         
         %Calculate and store mean vectors for Delta f
-        linMs(i,:) = mean(goodSubFeatureDiffs(:,1:size(linFeatMats{1},2)-1),1);
-        tmp = goodSubFeatureDiffs(:,size(linFeatMats{1},2):end);
+        linMs(i,:) = mean(goodSubFeatureDiffs(:,1:noLinFeats),1);
+        tmp = goodSubFeatureDiffs(:,noLinFeats+1:end);
         if ~isempty(tmp)
             circMs(i,:) = circ_mean(tmp,[],1);
         end

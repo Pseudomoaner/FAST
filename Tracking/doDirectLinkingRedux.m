@@ -78,7 +78,7 @@ for j = 1:gapSize
         %sufficiently uncrowded for this to work. Note this will not
         %generate accepted or rejected links for plotting in the
         %displacement space validation space.
-        if j == 1 && (size(covDfs,2)*(size(covDfs,2)+1))/2 > size(fromLinFeatMats{i},1)
+        if j == 1 && (size(covDfs,2)*(size(covDfs,2)+1))/2 > size(fromLinFeatMats{i},1) && ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
             pos1 = fromLinFeatMats{i}(:,2:3);
             pos2 = toLinFeatMats{i+j}(:,2:3);
             D = pdist2(pos1,pos2);
