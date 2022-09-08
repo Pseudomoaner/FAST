@@ -932,6 +932,9 @@ segmentImage(handles.axes1,false)
 function [] = segmentImage(axHand,init)
 global img
 global segmentParams
+global debugSet
+
+debugprogressbar(0,debugSet);
 
 %Set parameters
 MedFiltSize = 5;
@@ -943,17 +946,18 @@ imgMax = max(tempImg(:));
 
 %Display image
 cla
-if init
+if init %If this is the first time the plot has been shown
     imshow(filtImg,[],'parent',axHand);
     lims = axis(axHand);
 else
-    lims = axis(axHand);
+    lims = axis(axHand); %Inherit user-selected limits (if needed)
     imshow(filtImg,[],'parent',axHand);
 end
 hold on
 
 if strcmp(segmentParams.overlay,'None')
     axis(axHand,lims);
+    debugprogressbar(1,debugSet);
     return
 end
 
@@ -979,6 +983,7 @@ if strcmp(segmentParams.overlay,'Texture')
     alpha = Texture * 0.5;
     set(overHand,'AlphaData',alpha)
     axis(axHand,lims);
+    debugprogressbar(1,debugSet);
     return
 end
 
@@ -999,6 +1004,7 @@ if strcmp(segmentParams.overlay,'Ridges')
     alpha = Ridges * 0.5;
     set(overHand,'AlphaData',alpha)
     axis(axHand,lims);
+    debugprogressbar(1,debugSet);
     return
 end
 
@@ -1018,6 +1024,7 @@ if strcmp(segmentParams.overlay,'Watershed')
     alpha = ~and(~newEdges,~binEdges);
     set(overHand,'AlphaData',alpha)
     axis(axHand,lims);
+    debugprogressbar(1,debugSet);
     return
 end
 
@@ -1139,5 +1146,7 @@ if strcmp(segmentParams.overlay,'Segmentation')
         colormap(axHand,jetCmapFull)
     end
     axis(axHand,lims);
+    debugprogressbar(1,debugSet);
     return
 end
+debugprogressbar(1,debugSet);
