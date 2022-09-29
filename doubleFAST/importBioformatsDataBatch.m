@@ -53,13 +53,13 @@ try
     progressbar('Total completion','Current channel');
     
     for c = 1:noC
-        chanRoot = [rootdir,filesep,'Channel_',num2str(c)]; %Name of the output channel directory
+        chanRoot = fullfile(rootdir,['Channel_',num2str(c)]); %Name of the output channel directory
         if ~exist(chanRoot,'dir')
             mkdir(chanRoot)
         end
         
         for t = 1:noT
-            imgName = [chanRoot,filesep,sprintf('Frame_%04d.tif',t-1)];
+            outName = fullfile(chanRoot,sprintf('Frame_%04d.tif',t-1));
             iPlane = reader.getIndex(0,c-1,t-1)+1;
             I = double(bfGetPlane(reader, iPlane));
             
@@ -69,7 +69,7 @@ try
             
             I = uint16(I);
             
-            imwrite(I,imgName);
+            imwrite(I,outName);
             
             progressbar((c-1)/noC,(t-1)/noT)
         end
