@@ -953,7 +953,7 @@ else
     lims = axis(axHand); %Inherit user-selected limits (if needed)
     imshow(filtImg,[],'parent',axHand);
 end
-hold on
+hold(axHand,'on')
 
 if strcmp(segmentParams.overlay,'None')
     axis(axHand,lims);
@@ -979,9 +979,9 @@ Texture = imerode(Texture,seStre);
 if strcmp(segmentParams.overlay,'Texture')
     colorOver = cat(3,Texture,zeros(size(Texture)),zeros(size(Texture)));
     overHand = imshow(colorOver,'parent',axHand);
-    hold off
-    alpha = Texture * 0.5;
-    set(overHand,'AlphaData',alpha)
+    hold(axHand,'off')
+    alphaImg = Texture * 0.5;
+    set(overHand,'AlphaData',alphaImg)
     axis(axHand,lims);
     debugprogressbar(1,debugSet);
     return
@@ -1000,9 +1000,9 @@ Ridges = bwareaopen(Ridges,segmentParams.RidgeAMin);
 if strcmp(segmentParams.overlay,'Ridges')
     colorOver = cat(3,Ridges,zeros(size(Ridges)),zeros(size(Ridges)));
     overHand = imshow(colorOver,'parent',axHand);
-    hold off
-    alpha = Ridges * 0.5;
-    set(overHand,'AlphaData',alpha)
+    hold(axHand,'off')
+    alphaImg = Ridges * 0.5;
+    set(overHand,'AlphaData',alphaImg)
     axis(axHand,lims);
     debugprogressbar(1,debugSet);
     return
@@ -1021,8 +1021,9 @@ if strcmp(segmentParams.overlay,'Watershed')
     newEdges = imdilate(and(distW == 0, tempSeg),waterSE);
     colorOver = cat(3,or(newEdges,binEdges),binEdges,zeros(size(distW)));
     overHand = imshow(colorOver,'parent',axHand);
-    alpha = ~and(~newEdges,~binEdges);
-    set(overHand,'AlphaData',alpha)
+    hold(axHand,'off')
+    alphaImg = ~and(~newEdges,~binEdges);
+    set(overHand,'AlphaData',alphaImg)
     axis(axHand,lims);
     debugprogressbar(1,debugSet);
     return

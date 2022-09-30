@@ -126,8 +126,8 @@ try
     if metaStore.upsample
         metaStore.dx = double(omeMetadata.getPixelsPhysicalSizeX(0).value)/2;
         metaStore.dy = double(omeMetadata.getPixelsPhysicalSizeY(0).value)/2;
-        metaStore.maxX = metaStore.maxX * 2;
-        metaStore.maxY = metaStore.maxY * 2;
+        metaStore.maxX = metaStore.maxX * 2 - 1;
+        metaStore.maxY = metaStore.maxY * 2 - 1;
     else
         metaStore.dx = double(omeMetadata.getPixelsPhysicalSizeX(0).value);
         metaStore.dy = double(omeMetadata.getPixelsPhysicalSizeY(0).value);

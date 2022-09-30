@@ -35,8 +35,8 @@ for i = 1:length(linFeatMats)
     circFeats = [circFeats;circFeatMats{i}(:,2:end)];
 end
 allFeats = [linFeats,circFeats];
-minFeats = min(allFeats(:,1:size(allFeats,2)-1),[],1);
-maxFeats = max(allFeats(:,1:size(allFeats,2)-1),[],1);
+minFeats = min(allFeats,[],1);
+maxFeats = max(allFeats,[],1);
 
 noFeats = size(allFeats,2);
 noLinFeats = size(linFeats,2);
@@ -58,8 +58,8 @@ for i = 1:length(linFeatMats) - 1 %Loop over time indices
         end
         
         %Regularize the linear data, so it varies between 0 and 1. Is an approximate way of weighting all features equally, so you can get estimates of the statistics you need to weigh them more accurately later.
-        linFrame1Reg = (linFrame1 - repmat(minFeats,size(linFrame1,1),1))./(repmat(maxFeats,size(linFrame1,1),1) - repmat(minFeats,size(linFrame1,1),1));
-        linFrame2Reg = (linFrame2 - repmat(minFeats,size(linFrame2,1),1))./(repmat(maxFeats,size(linFrame2,1),1) - repmat(minFeats,size(linFrame2,1),1));
+        linFrame1Reg = (linFrame1 - repmat(minFeats(1:noLinFeats),size(linFrame1,1),1))./(repmat(maxFeats(1:noLinFeats),size(linFrame1,1),1) - repmat(minFeats(1:noLinFeats),size(linFrame1,1),1));
+        linFrame2Reg = (linFrame2 - repmat(minFeats(1:noLinFeats),size(linFrame2,1),1))./(repmat(maxFeats(1:noLinFeats),size(linFrame2,1),1) - repmat(minFeats(1:noLinFeats),size(linFrame2,1),1));
         
         %Decide if user wants to use all features or just the centroid
         switch statsUse

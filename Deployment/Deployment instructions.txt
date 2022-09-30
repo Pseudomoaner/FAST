@@ -4,7 +4,8 @@ Part 1: Assembling the files
 1: Make a new release on Github. Download the associated .zip file.
 2: Unzip to this folder.
 3: Add the latest version of the bioformats_package.jar file to the /homePanel/bfmatlab folder
-4: Zip up everything and upload to the Wiki (see part 3).
+4: Remove the SPR_Groundtruthing folder (Contains diagnostic material for the manuscript)
+5: Zip up everything and upload to the Wiki (see part 3).
 
 Part 2: Compiling the application
 1: Either start a new .prj file with the application packager app in Matlab, or load an old one. In either case, ensure metadata fields are filled out correctly, including DeploymentSplash.png and MiniLogo.png as your splash screens and logo respectively.
