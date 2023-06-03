@@ -67,6 +67,15 @@ linMs = linkStats.linMs;
 circMs = linkStats.circMs;
 incRads = linkStats.incRads;
 
+sizeList = cellfun(@(x)size(x,1),Tracks);
+minNoObjs = (size(covDfs,2)*(size(covDfs,2)+1))/2;
+firstConstrainedTime = find(diff(sizeList>minNoObjs)==1,1) + 1;
+if ~isempty(firstConstrainedTime)
+    subConstraintThresh = 3*sqrt(mean(covDfs(firstConstrainedTime:end,1,1)) + mean(covDfs(firstConstrainedTime:end,2,2)));
+else
+    subConstraintThresh = inf;
+end
+
 debugprogressbar([0.4;0;0],debugSet);
 
 for j = 1:gapSize
@@ -74,18 +83,23 @@ for j = 1:gapSize
         %If this is the first pass (i.e. the gap size is zero) and the
         %covariance matrix is poorly constrained (here, if there are fewer
         %objects in this frame than there are independent elements of the covariance
-        %matrix), just run with a nearest neighbour approach. Should be
+        %matrix), try using the constraints from the first timepoint where 
+        %the convariance matrix is well-defined. Otherwise, just run with a 
+        %nearest neighbour approach. Should be
         %sufficiently uncrowded for this to work. Note this will not
         %generate accepted or rejected links for plotting in the
         %displacement space validation space.
-        if j == 1 && (size(covDfs,2)*(size(covDfs,2)+1))/2 > size(fromLinFeatMats{i},1) && ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
+        if j == 1 && minNoObjs > size(fromLinFeatMats{i},1) && ~isempty(fromLinFeatMats{i}) && ~isempty(toLinFeatMats{i+j})
             pos1 = fromLinFeatMats{i}(:,2:3);
             pos2 = toLinFeatMats{i+j}(:,2:3);
             D = pdist2(pos1,pos2);
             
-            [~,minInd] = min(D(:));
+            [minD,minInd] = min(D(:));
             
-            while ~isempty(D)
+            %We will include a (weak) distance threshold to *try* to filter
+            %out divisions, based on the standard deviation of positional
+            %movement over all timepoints (see above)
+            while ~isempty(D) && minD < subConstraintThresh
                 %Find the minimum distance between frames at the moment
                 [Ind1,Ind2] = ind2sub(size(D),minInd);
                 frame1Loc = fromLinFeatMats{i}(Ind1,1);
