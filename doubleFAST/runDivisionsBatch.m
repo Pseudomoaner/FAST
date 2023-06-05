@@ -17,16 +17,57 @@ load(tracksPath)
 %Get the feature statistics and formatted feature matrices
 [linkStats,tgtMat,pred1Mat,pred2Mat,featureStruct] = gatherDivisionStats(procTracks,divisionSettings);
 
-%Do the actual tracking
-[linkArray1,linkArray2,acceptDiffs,rejectDiffs] = doDivisionLinkingRedux(tgtMat,pred1Mat,pred2Mat,linkStats,divisionSettings.incRad,true);
+%Do the division detection itself - optimise inclusion threshold
+maxLoops = 10; %Number of loops you should try optimising over
+maxWorking = 0;
+minNotWorking = inf;
+incRad = 3;
 
 progressbar(0);
 
+for i = 1:maxLoops
+    [linkArray1,linkArray2,acceptDiffs,rejectDiffs] = doDivisionLinkingRedux(tgtMat,pred1Mat,pred2Mat,linkStats,incRad,true);
+    
+    try
+        procTracks = addDivisionLinks(procTracks,linkArray1,linkArray2);
+        maxWorking = incRad;
+    catch ME
+        if (strcmp(ME.identifier,'MATLAB:lang:StackOverflow'))
+            minNotWorking = incRad;
+        else
+            rethrow(ME)
+        end
+    end
+    incRad = (minNotWorking+maxWorking)/2;
+    
+    progressbar(i/(maxLoops+1))
+end
+
+[linkArray1,linkArray2,acceptDiffs,rejectDiffs] = doDivisionLinkingRedux(tgtMat,pred1Mat,pred2Mat,linkStats,maxWorking,true);
 procTracks = addDivisionLinks(procTracks,linkArray1,linkArray2);
 
 %Save a backup copy of the raw tracks if one doesn't already exist
 if ~exist([root,filesep,'Pre-division_Tracks.mat'],'file')
     copyfile([root,filesep,'Tracks.mat'],[root,filesep,'Pre-division_Tracks.mat'])
+end
+
+%Get lineage sizes to remove small ones
+linCount = 0;
+for i = 1:size(procTracks,2)
+    if isempty(procTracks(i).M) %If this is the founder of a lineage
+        linCount = linCount + 1;
+    end
+end
+
+linSizes = zeros(linCount,1);
+Ms = zeros(linCount,1);
+sInd = 1;
+for i = 1:size(procTracks,2)
+    if isempty(procTracks(i).M) %If cell has no mother, call it the founder of a new lineage
+        linSizes(sInd) = size(getLineageIndices(procTracks,i,0),1);
+        Ms(sInd) = i;
+        sInd = sInd + 1;
+    end
 end
 
 %Update your tracks to get rid of ones that are part of small lineages

@@ -87,17 +87,14 @@ trackableData = struct();
 
 %Set up the sliders
 divisionSettings.incProp = trackSettings.incProp;
-divisionSettings.incRad = 0.1;
 divisionSettings.gapWidth = trackSettings.gapWidth;
 divisionSettings.statsUse = 'Centroid';
 divisionSettings.minInc = 2;
 
 handles.InclusionSlide.Value = divisionSettings.incProp;
-handles.ThreshSlide.Value = divisionSettings.incRad;
 handles.minSlide.Value = divisionSettings.minInc;
 
 handles.InclusionEdit.String = num2str(divisionSettings.incProp);
-handles.ThreshEdit.String = num2str(divisionSettings.incRad);
 handles.minEdit.String = num2str(divisionSettings.minInc);
 
 handles.radiobutton1.Value = 0;
@@ -242,14 +239,6 @@ divisionSettings.calculated = 1;
 divisionSettings.detected = 0;
 handles.pushbutton4.Enable = 'on';
 
-%Set a default value for the inclusion radius (and the maximum value, for the slider)
-%Note - don't need to make adaptive, as not time dependent rescaling. So
-%just use a simple threshold (rather than mucking around with hyperspheres)
-handles.ThreshSlide.Value = 3;
-handles.ThreshSlide.Max = 10;
-handles.ThreshEdit.String = '3';
-divisionSettings.incRad = 3;
-
 %Do the plotting for the GUI - axes 1
 plotUnnormalizedDivStepSizes(tgtMat,pred1Mat,pred2Mat,divisionSettings.statsUse,divisionSettings.incProp,linkStats.trackability,handles.axes1)
 
@@ -276,23 +265,37 @@ global procTracks
 global root
 global Ms
 global linSizes
+global debugSet
 
-[linkArray1,linkArray2,acceptDiffs,rejectDiffs] = doDivisionLinkingRedux(tgtMat,pred1Mat,pred2Mat,linkStats,divisionSettings.incRad,true);
+maxLoops = 10; %Number of loops you should try optimising over
+maxWorking = 0;
+minNotWorking = inf;
+incRad = 3;
 
-featDiffs.accept = acceptDiffs;
-featDiffs.reject = rejectDiffs;
+debugprogressbar(0,debugSet)
 
-try
-    procTracks = addDivisionLinks(procTracks,linkArray1,linkArray2);
-catch ME
-    if (strcmp(ME.identifier,'MATLAB:lang:StackOverflow'))
-        errordlg('Detection threshold is too lenient to prevent a loop from emerging in the lineage tree. Please reduce the detection threshold.','Parameter error')
-        return
-    else
-        rethrow(ME)
+for i = 1:maxLoops
+    [linkArray1,linkArray2,acceptDiffs,rejectDiffs] = doDivisionLinkingRedux(tgtMat,pred1Mat,pred2Mat,linkStats,incRad,true);
+    
+    try
+        procTracks = addDivisionLinks(procTracks,linkArray1,linkArray2);
+        maxWorking = incRad;
+        
+        featDiffs.accept = acceptDiffs;
+        featDiffs.reject = rejectDiffs;
+    catch ME
+        if (strcmp(ME.identifier,'MATLAB:lang:StackOverflow'))
+            minNotWorking = incRad;
+        else
+            rethrow(ME)
+        end
     end
+    incRad = (minNotWorking+maxWorking)/2;
+    
+    debugprogressbar(i/maxLoops,debugSet)
 end
 
+divisionSettings.incRad = maxWorking;
 divisionSettings.showDiv = [];
 for i = 1:size(procTracks,2)
     if ~isempty(procTracks(i).D1) || ~isempty(procTracks(i).D2)
@@ -586,79 +589,6 @@ end
 % --- Executes during object creation, after setting all properties.
 function InclusionEdit_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to InclusionEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on slider movement - incRad
-function ThreshSlide_Callback(hObject, eventdata, handles)
-% hObject    handle to ThreshSlide (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-global divisionSettings
-global featDiffs
-global linkStats
-
-divisionSettings.incRad = get(hObject,'Value');
-handles.ThreshEdit.String = num2str(divisionSettings.incRad);
-
-if divisionSettings.detected == 1
-    plotNormalizedDivStepSizes(divisionSettings,featDiffs,linkStats,handles.axes2)
-end
-
-% --- Executes during object creation, after setting all properties.
-function ThreshSlide_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to ThreshSlide (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
-function ThreshEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to ThreshEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of ThreshEdit as text
-%        str2double(get(hObject,'String')) returns contents of ThreshEdit as a double
-global divisionSettings
-global featDiffs
-global linkStats
-
-txtValue = str2double(get(hObject,'String'));
-
-if txtValue < 0 
-    txtValue = 0;
-end
-
-divisionSettings.incRad = txtValue;
-handles.ThreshEdit.String = num2str(txtValue);
-
-if txtValue > handles.ThreshSlide.Max
-    txtValue = handles.ThreshSlide.Max;
-end
-
-handles.ThreshSlide.Value = txtValue;
-
-if divisionSettings.detected == 1
-    plotNormalizedDivStepSizes(divisionSettings,featDiffs,linkStats,handles.axes2)
-end
-
-% --- Executes during object creation, after setting all properties.
-function ThreshEdit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to ThreshEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
