@@ -39,6 +39,7 @@ F1_autoTracks = zeros(size(branches));
 F1_manTracks = zeros(size(branches));
 
 trackabilityMean = zeros(size(branches));
+trackabilityList = [];
 
 F1_ManFrames = [];
 noCells_ManFrames = [];
@@ -66,46 +67,92 @@ for b = 1:size(branches,2)
     firstGoodInd = find(cellfun(@(x)size(x,1),trackableData.Centroid) > 32, 1);
     
     trackabilityMean(b) = mean(linkStats.trackability(firstGoodInd:end));
+    trackabilityList = [trackabilityList;linkStats.trackability(firstGoodInd:end)];
     
-    F1_ManFrames = [F1_ManFrames;(TP_Man*2)./(TP_Man*2 + FP_Man + FN_Man)];
+    F1_ManFrames = [F1_ManFrames;(TP_Man(firstGoodInd:end)*2)./(TP_Man(firstGoodInd:end)*2 + FP_Man(firstGoodInd:end) + FN_Man(firstGoodInd:end))];
     lenList = cellfun(@(x)size(x,1),trackableData.Centroid);
-    noCells_ManFrames = [noCells_ManFrames;lenList(1:end-1)];
+    noCells_ManFrames = [noCells_ManFrames;lenList(firstGoodInd:end-1)];
 end
 
 %Part 3: Assess division detection quality
+F1_autoDivs = zeros(size(branches));
+F1_manDivs = (size(branches));
+for b = 1:size(branches,2)
+    load(fullfile(root,branches{b},'Tracks_GoldStandardDivisions.mat'))
+    manualTracks = procTracks;
+    load(fullfile(root,branches{b},'Tracks_AutoStreamDivisions.mat'))
+    autoTracks = procTracks;
+    load(fullfile(root,branches{b},'Tracks_ManualStreamDivisions.mat'))
+    correctedTracks = procTracks;
+    
+    [TP_Auto,FP_Auto,TN_Auto,FN_Auto] = scoreDivisionQuality(autoTracks,manualTracks);
+    [TP_Man,FP_Man,TN_Man,FN_Man] = scoreDivisionQuality(correctedTracks,manualTracks);
+    
+    F1_manDivs(b) = (2*sum(TP_Man))/(2*sum(TP_Man) + sum(FN_Man) + sum(FP_Man));
+    F1_autoDivs(b) = (2*sum(TP_Auto))/(2*sum(TP_Auto) + sum(FN_Auto) + sum(FP_Auto));
+end
 
 %Part 4: Assemble metrics on a single plot
 figure
 hold on
 ax=gca;
+
+F1_manDivs(F1_manDivs == 1) = 0.9999;
 for i = 1:size(F1_autoTracks,2)
-    plot(1,1-F1_Segmentations(i),'r.')
+    plot(1,1-F1_Segmentations(i),'k.')
     plot([2,3],1-[F1_manTracks(i),F1_autoTracks(i)],'r')
     plot([2,3],1-[F1_manTracks(i),F1_autoTracks(i)],'r.')
+%     plot([3,4],1-[F1_autoTracks(i),F1_manDivs(i)],'g')
+    plot([4,5],1-[F1_manDivs(i),F1_autoDivs(i)],'b')
+    plot([4,5],1-[F1_manDivs(i),F1_autoDivs(i)],'b.')
 end
 
-axis([0.5,3.5,0.0001,0.05])
+axis([0.5,5.5,0.0001,0.5])
 ax.YScale = 'log';
 ax.YDir = 'reverse';
+
+xticklabels({'Segmentation','Tracking (manual stream)','Tracking (auto stream)','Divisions (manual stream)','Divisions (auto stream)'})
+ylabel('1 - F-score')
+
 
 %Part 5: Show relationship between tracking accuracy and trackability
 figure
 hold on
 ax = gca;
-plot(trackabilityMean,1-F1_manTracks,'r.')
 
-axis([4,9,0.001,0.05])
-ax.YScale = 'log';
-ax.YDir = 'reverse';
+tbl_Track = table(trackabilityMean',log(1-F1_autoTracks)');
+mdl_Track = fitlm(tbl_Track,'Var2 ~ Var1');
+tbl_Div = table(trackabilityMean',log(1-F1_autoDivs)');
+mdl_Div = fitlm(tbl_Div,'Var2 ~ Var1');
+
+plot(mdl_Track)
+plot(mdl_Div)
+
+xlabel('Mean trackability (bits/object)')
+ylabel('log(1 - F-score)')
 
 %Part 6: Show relationship between instantaneous number of cells and
 %tracking accuracy
 figure
 hold on
 ax = gca;
-plot(noCells_ManFrames(noCells_ManFrames > 2),F1_ManFrames(noCells_ManFrames > 2),'r.')
-smoothY = polyfit(noCells_ManFrames(noCells_ManFrames > 2),F1_ManFrames(noCells_ManFrames > 2),2);
-x = sort(noCells_ManFrames(noCells_ManFrames > 2));
-plot(x,polyval(smoothY,x),'k')
+tbl_TrackCells = table(noCells_ManFrames,F1_ManFrames);
+mdl_TrackCells = fitlm(tbl_TrackCells,'F1_ManFrames ~ noCells_ManFrames');
+plot(mdl_TrackCells)
 
-ax.XScale = 'log';
+xlabel('Number of cells')
+ylabel('F-score')
+title('')
+
+%Part 7: Show relationship between instantaneous trackability and tracking
+%accuracy
+figure
+hold on
+ax = gca;
+tbl_TrackTrackability = table(trackabilityList,F1_ManFrames);
+mdl_TrackTrackability = fitlm(tbl_TrackTrackability,'F1_ManFrames ~ trackabilityList');
+plot(mdl_TrackTrackability)
+
+xlabel('Instantaneous trackability (bits/object)')
+ylabel('F-score')
+title('')
