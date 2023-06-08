@@ -82,13 +82,8 @@ if divSettings.Orientation == 1
 end
 
 if ~isempty(divSettings.MeanInc)
-    logicAvail = false(size(divSettings.availableMeans));
-    logicUsed = false(size(divSettings.MeanInc));
-    logicAvail(divSettings.availableMeans) = true;
-    logicUsed(divSettings.MeanInc) = true;
-    
-    for i = 1:size(logicUsed,1)
-        currFeatStr = ['channel_',num2str(logicUsed(i)),'_mean'];
+    for i = 1:size(divSettings.MeanInc,1)
+        currFeatStr = ['channel_',num2str(divSettings.MeanInc(i)),'_mean'];
         featureStruct.(currFeatStr).('Locations') = 1;
         featureStruct.(currFeatStr).('divArguments') = {currFeatStr};
         featureStruct.(currFeatStr).('postDivScale1') = @(x) x;
@@ -98,13 +93,8 @@ if ~isempty(divSettings.MeanInc)
 end
 
 if ~isempty(divSettings.StdInc)
-    logicAvail = false(size(divSettings.availableStds));
-    logicUsed = false(size(divSettings.StdInc));
-    logicAvail(divSettings.availableStds) = true;
-    logicUsed(divSettings.StdInc) = true;
-    
     for i = 1:size(logicUsed,1)
-        currFeatStr = ['channel_',num2str(logicUsed(i)),'_std'];
+        currFeatStr = ['channel_',num2str(divSettings.MeanInc(i)),'_std'];
         featureStruct.(currFeatStr).('Locations') = 1;
         featureStruct.(currFeatStr).('divArguments') = {currFeatStr};
         featureStruct.(currFeatStr).('postDivScale1') = @(x) x;

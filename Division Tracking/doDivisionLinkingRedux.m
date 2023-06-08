@@ -99,7 +99,7 @@ if ~isempty(tgtMat.lin) && ~isempty(pred1Mat.lin) && ~isempty(pred2Mat.lin)
     
     D1(sameT) = Inf;
     D2(sameT) = Inf;
-    
+
     %Set comparisons of self to self to Inf (stop links to self)
     indT = repmat(tgtMat.lin(:,1),1,size(pred1Mat.lin,1));
     indP = repmat(pred1Mat.lin(:,1)'-1,size(tgtMat.lin,1),1);
