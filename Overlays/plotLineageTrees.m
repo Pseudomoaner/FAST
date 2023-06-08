@@ -51,7 +51,7 @@ for lInd = 1:size(allLinInds,2)
     if minT < FrameNo && maxT > FrameNo %If that is the case...
         for lnInd = 1:size(allLinInds{lInd},1) %For each track in this lineage...
             cInd = allLinInds{lInd}(lnInd);
-            currTInds = find(data(cInd).times(1:end-1) <= FrameNo);
+            currTInds = find(data(cInd).times(1:end-1) < FrameNo);
             for tInd = currTInds
                 xCoords = data(cInd).x(tInd:tInd+1)/overlaySettings.pixSize;
                 yCoords = data(cInd).y(tInd:tInd+1)/overlaySettings.pixSize;
@@ -69,7 +69,7 @@ for lInd = 1:size(allLinInds,2)
             end
             
             %Plot all the division events (if present)
-            if ~isempty(data(cInd).D1) && FrameNo >= data(cInd).times(end)
+            if ~isempty(data(cInd).D1) && FrameNo > data(cInd).times(end)
                 dau1 = data(cInd).D1;
                 dau2 = data(cInd).D2;
                 
