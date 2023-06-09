@@ -93,7 +93,7 @@ if ~isempty(divSettings.MeanInc)
 end
 
 if ~isempty(divSettings.StdInc)
-    for i = 1:size(logicUsed,1)
+    for i = 1:size(divSettings.StdInc,1)
         currFeatStr = ['channel_',num2str(divSettings.MeanInc(i)),'_std'];
         featureStruct.(currFeatStr).('Locations') = 1;
         featureStruct.(currFeatStr).('divArguments') = {currFeatStr};
