@@ -24,6 +24,7 @@ for b = 1:size(branches,2)
     %Speed measurements
     vmags = arrayfun(@(x)mean(x.vmag)*dx/dt,procTracks);
     vmagList(b) = mean(vmags(goodTracks));
+    disp(mean(arrayfun(@(x)mean(x.majorLen)*dx,procTracks)));
     
     %Growth rate measurements
     GRs = zeros(size(procTracks));
@@ -68,7 +69,7 @@ ylabel('Average trackability (bits/object)')
 ax=gca;
 ax.LineWidth = 1.5;
 ax.Box = 'on';
-ylim([0,10])
+ylim([0,11])
 xlim([0.035,0.07])
 
 subplot(1,4,2)
@@ -88,7 +89,7 @@ xlabel('Average growth rate (1/min)')
 ax=gca;
 ax.LineWidth = 1.5;
 ax.Box = 'on';
-ylim([0,10])
+ylim([0,11])
 xlim([0.01,0.025])
 
 subplot(1,4,3)
@@ -108,7 +109,7 @@ xlabel('COV - fluoresence')
 ax=gca;
 ax.LineWidth = 1.5;
 ax.Box = 'on';
-ylim([0,10])
+ylim([0,11])
 xlim([0.022,0.048])
 
 subplot(1,4,4)
@@ -128,5 +129,5 @@ xlabel('COV - width')
 ax=gca;
 ax.LineWidth = 1.5;
 ax.Box = 'on';
-ylim([0,10])
+ylim([0,11])
 xlim([0.05,0.065])

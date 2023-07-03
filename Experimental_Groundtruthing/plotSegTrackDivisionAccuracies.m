@@ -141,7 +141,7 @@ brn = [177,78,78]/255;
 ms = 4;
 F1_manDivs(F1_manDivs == 1) = 0.9999;
 for i = 1:size(F1_autoTracks,2)
-    plot(1,1-F1_Segmentations(i),'ko','MarkerSize',ms,'LineWidth',1)
+    plot(1,1-F1_Segmentations(i),'k^','MarkerSize',ms,'LineWidth',1)
     plot([2,3],1-[F1_manTracks(i),F1_autoTracks(i)],'Color',purp)
     plot([2,3],1-[F1_manTracks(i),F1_autoTracks(i)],'o','Color',purp,'MarkerFaceColor',purp,'MarkerSize',ms,'LineWidth',1)
 %     plot([3,4],1-[F1_autoTracks(i),F1_manDivs(i)],'g')
@@ -150,7 +150,7 @@ for i = 1:size(F1_autoTracks,2)
 end
 
 %Highlight the displayed colony in panels a and b
-plot(1,1-F1_Segmentations(1),'ko','MarkerSize',ms+1.5,'LineWidth',1)
+plot(1,1-F1_Segmentations(1),'k^','MarkerSize',ms+1.5,'LineWidth',1)
 plot([2,3],[1-F1_manTracks(1),1-F1_autoTracks(1)],'ko','MarkerSize',ms+1.5,'LineWidth',1)
 plot([4,5],[1-F1_manDivs(1),1-F1_autoDivs(1)],'ko','MarkerSize',ms+1.5,'LineWidth',1)
 
