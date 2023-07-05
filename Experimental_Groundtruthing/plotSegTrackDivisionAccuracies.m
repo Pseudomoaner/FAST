@@ -6,6 +6,7 @@ branches = {'140408_01_cib','140408_02_cib','140408_09_cib','140408_10_cib','140
 
 %Part 1: Assess segmentation quality
 F1_Segmentations = zeros(size(branches));
+ER_Segmentations = zeros(size(branches));
 for b = 1:size(branches,2)
     load(fullfile(root,branches{b},'CellFeatures_ManualSeg.mat'))
     
@@ -29,9 +30,11 @@ for b = 1:size(branches,2)
         noUndersegs(t) = max(underSegsLabels(:));
     end
     
-    totObjs = sum(cellfun(@(x)size(x,1),trackableData.Centroid));
+    totObjs = sum(cellfun(@(x)size(x,1),trackableData.Centroid)); %Counted from the manually corrected dataset
+    correctSegs = totObjs - sum(noOversegs) - sum(noUndersegs)*2; %Undersegs counted twice, since they will result in two missed segmentations
     
-    F1_Segmentations(b) = 2*totObjs/(2*totObjs + sum(noOversegs) + sum(noUndersegs));
+    F1_Segmentations(b) = 2*correctSegs/(2*correctSegs + sum(noOversegs) + sum(noUndersegs));
+    ER_Segmentations(b) = (sum(noOversegs) + sum(noUndersegs))/totObjs;
 end
 
 %Part 2: Assess tracking quality
@@ -41,6 +44,7 @@ F1_autoCentTracks = zeros(size(branches));
 
 ER_autoTracks = zeros(size(branches));
 ER_autoCentTracks = zeros(size(branches));
+ER_manTracks = zeros(size(branches));
 
 trackabilityMean = zeros(size(branches));
 trackabilityMeanCents = zeros(size(branches));
@@ -97,6 +101,7 @@ for b = 1:size(branches,2)
     %fold-improvement by including centroids.
     ER_autoTracks(b) = (sum(FN_Auto) + sum(FP_Auto))/(sum(FN_Auto) + sum(FP_Auto) + sum(TN_Auto) + sum(TP_Auto));
     ER_autoCentTracks(b) = (sum(FN_AutoCent) + sum(FP_AutoCent))/(sum(FN_AutoCent) + sum(FP_AutoCent) + sum(TN_AutoCent) + sum(TP_AutoCent));
+    ER_manTracks(b) = (sum(FN_Man) + sum(FP_Man))/(sum(FN_Man) + sum(FP_Man) + sum(TN_Man) + sum(TP_Man));
 end
 
 %Part 3: Assess division detection quality
@@ -106,6 +111,7 @@ F1_autoDivsCents = zeros(size(branches));
 
 ER_autoDivs = zeros(size(branches));
 ER_autoDivsCents = zeros(size(branches));
+ER_manDivs = zeros(size(branches));
 
 for b = 1:size(branches,2)
     load(fullfile(root,branches{b},'Tracks_GoldStandardDivisions.mat'))
@@ -129,6 +135,7 @@ for b = 1:size(branches,2)
     %fold-improvement by including centroids.
     ER_autoDivs(b) = (sum(FN_Auto) + sum(FP_Auto))/(sum(FN_Auto) + sum(FP_Auto) + sum(TN_Auto) + sum(TP_Auto));
     ER_autoDivsCents(b) = (sum(FN_AutoCent) + sum(FP_AutoCent))/(sum(FN_AutoCent) + sum(FP_AutoCent) + sum(TN_AutoCent) + sum(TP_AutoCent));
+    ER_manDivs(b) = (sum(FN_Man) + sum(FP_Man))/(sum(FN_Man) + sum(FP_Man) + sum(TN_Man) + sum(TP_Man));
 end
 
 %Part 4: Assemble metrics on a single plot

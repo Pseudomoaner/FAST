@@ -401,6 +401,26 @@ end
 
 debugprogressbar(0,debugSet)
 
+%Get the image size on an empty image. Future overlays will be cropped tS
+%this size.
+overlayStore = overlaySettings.type;
+eventStore = overlaySettings.eventShow;
+IDstore = overlaySettings.IDshow;
+overlaySettings.type = 'None';
+overlaySettings.eventShow = 0;
+overlaySettings.IDshow = 0;
+
+plotOverlay(procTracks,root,overlaySettings,colourmap,handles.axes1,false,debugSet)
+pause(0.1)
+currFile = fullfile(overlayDirect,sprintf('Frame_%04d.tif',handles.slider1.Min));
+export_fig(handles.axes1,currFile,'-tif','-m1')
+img = imread(currFile);
+imLims = size(img);
+
+overlaySettings.type = overlayStore;
+overlaySettings.eventShow = eventStore;
+overlaySettings.IDshow = IDstore;
+
 for i = handles.slider1.Min:handles.slider1.Max
     currFile = [overlayDirect,filesep,sprintf('Frame_%04d.tif',i-1)];
     overlaySettings.showFrame = i-1;
@@ -408,12 +428,9 @@ for i = handles.slider1.Min:handles.slider1.Max
     pause(0.1)
     export_fig(handles.axes1,currFile,'-tif','-m1')
     img = imread(currFile);
-    if i == 1 %If first timepoint
-        imLims = size(img);
-    else
-        img = img(1:imLims(1),1:imLims(2),:);
-        imwrite(img,currFile);
-    end
+    img = img(1:imLims(1),1:imLims(2),:);
+    imwrite(img,currFile);
+    
     debugprogressbar(i/(handles.slider1.Max-handles.slider1.Min),debugSet)
 end
 
