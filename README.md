@@ -18,4 +18,4 @@ Have you struggled with automated measurement of the movement of many closely-pa
 
 If you find this software useful in your research, please cite our paper:
 
-Meacock, O. J, Durham, W. M, **Tracking bacteria at high density with FAST, the Feature-Assisted Segmenter/Tracker**, PLOS Computational Biology *19*(10), e1011524 (2023), doi: https://doi.org/10.1371/journal.pcbi.1011524 
+Meacock, O. J, Durham, W. M, **Tracking bacteria at high density with FAST, the Feature-Assisted Segmenter/Tracker**, PLOS Computational Biology **19**(10), e1011524 (2023), doi: https://doi.org/10.1371/journal.pcbi.1011524 
