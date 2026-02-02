@@ -86,7 +86,7 @@ catch
     slashLocs = regexp(codeName,filesep);
     codeRoot = codeName(1:slashLocs(end));
     jarName = [codeRoot,'bfmatlab',filesep,'bioformats_package.jar'];
-    if exist(jarName,'file')
+    if ~exist(jarName,'file')
         hErr = errordlg('bioformats_package.jar file does not seem to be available. Please ensure this is placed in \FAST\homePanel\bfmatlab and try again.');
     else
         % Otherwise, throw generic message
