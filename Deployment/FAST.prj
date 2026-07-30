@@ -1,0 +1,284 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration file="C:\Users\bi1ojm\Documents\GitHub\FAST\Deployment\FAST.prj" location="C:\Users\bi1ojm\Documents\GitHub\FAST\Deployment" name="FAST" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>FAST</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>2.2</param.version>
+    <param.authnamewatermark>Oliver Meacock</param.authnamewatermark>
+    <param.email>o.meacock@sheffield.ac.uk</param.email>
+    <param.company>University of Sheffield</param.company>
+    <param.summary>The Feature-Assisted Segmenter/Tracker, FAST.</param.summary>
+    <param.description>FAST is a suite of tools designed to segment, measure, track and visualise high-density, high-motility 2D microscopy datasets. For more information, please refer to the project Wiki:
+
+https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php</param.description>
+    <param.screenshot>${PROJECT_ROOT}\DeploymentSplash.png</param.screenshot>
+    <param.guid />
+    <param.installpath.string>\University of Sheffield\FAST\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\FAST\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\FAST\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\FAST\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\FAST</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	 FAST -? 
+	 FAST varargin 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 varargin  input arguments 
+ Description 
+ 	 FAST is a suite of tools designed to segment, measure, track and visualise high-density, high-motility 2D microscopy datasets. For more information, please refer to the project Wiki:
+
+https://mackdurham.group.shef.ac.uk/FAST_DokuWiki/dokuwiki/doku.php</param.help.text>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+    </unset>
+    <fileset.main>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\homePanel\homePanel.m</file>
+    </fileset.main>
+    <fileset.resources>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Divisions.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Features.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Overlays.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Plotting.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Segmentation.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\TextLogoLarge.png</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Imagery\Tracking.png</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\bioformats_package.jar</file>
+    </fileset.resources>
+    <fileset.package />
+    <fileset.depfun>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\ChannelPicker\ChannelPicker.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\addDivisionLinks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\buildDivisionFeatureMats.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\displayCellDivision.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\divisionTracker.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\divisionTracker.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\doDivisionLinkingRedux.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\gatherDivisionStats.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\getDivPopupStrings.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\getDivScalingFactors.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\getLineageIndices.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\plotLineageLengthDistribution.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\plotNormalizedDivStepSizes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\plotUnnormalizedDivStepSizes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\prepareDivStruct.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Division Tracking\setupDivisionCheckboxes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\copyfig.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\crop_borders.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\eps2pdf.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\export_fig.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\fix_lines.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\ghostscript.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\isolate_axes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\pdf2eps.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\pdftops.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\print2array.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\print2eps.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\read_write_entire_textfile.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\user_string.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\export_fig\using_hg2.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\extractFeatureEngine.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\extractFeatures.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\extractFeatures.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\fit_ellipse.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\rotationMeasures.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Feature Extraction\rotationMeasuresMaxPerimDist.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\circ_kappa.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\circ_mean.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\circ_r.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\circ_wwtest.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\circDist.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\getDimensionalSymbols.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\interp1Ang.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\patchline.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\pdistCirc2.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\prepareSpecialFeatureStructure.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\switchVarName.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\helperFuncs\wrapAngleTimecourse.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\homePanel\homePanel.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\homePanel\importBioformatsData.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\homePanel\updateHomePanelButtons.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Manuscript\SPR_Groundtruthing\QuasiS3R_FAST_Edit\Plotting\ellipse.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\drawCircleOnImg.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\freezeColors\freezeColors.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\makeRing.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\overlayTester.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\overlayTester.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotAllInstantaneousTracks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotarrow.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotBoundaryOnPicture.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotCellOnPicture.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotEvents.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotLineageTrees.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotMaskOnPicture.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotOverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotTrackedCellBoundaryOverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotTrackedCellEllipticalOverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\plotTrackedCellMaskOverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\setupOverlayPopupStrings.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Overlays\writeIDonImg.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\densityScatter.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plot2DHistogram.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotCartouche.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotDivisionAverage.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotEventAverage.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotJointDistribution.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotKymograph.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotPhaseSpace.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotRMSD.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotTimecourse.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotTrackHists.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotTracks.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\plotTracks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\runPlotting.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\setupPlotGUIvisibilities.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Plotting\setupPlotPopupStrings.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Progress Bar\debugprogressbar.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\diffTrackSegment.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\diffTrackSegment.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\imoverlay\imoverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\imoverlay\imoverlay_tool.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\Joes_Ridge_Detection\bwRidgeCenterMod.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\Joes_Ridge_Detection\im_hessangle2.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\Joes_Ridge_Detection\im_hessstrflt2.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\Joes_Ridge_Detection\im_scalablehess2.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Segmentation\segmentAndSave.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\buildFeatureMatricesRedux.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\diffusionTracker.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\diffusionTracker.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\doDirectLinkingRedux.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\drawCircle.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\extractDataTrack.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\gatherLinkStats.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\getAllVelocities.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\getPopupStrings.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\getScalingFactors.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotLinkDiffs.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotNormalizedStepSizes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotSegmentationOnPicture.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotTrackedCellSegmentedOverlay.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotTrackLengthDistribution.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\plotUnnormalizedStepSizes.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\prepareTrackStruct.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\processTracks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\terminateCorrection.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\TrackCorrection\CorrectTracks.fig</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\TrackCorrection\CorrectTracks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\TrackCorrection\displayEditableTracks.m</file>
+      <file>C:\Users\bi1ojm\Documents\GitHub\FAST\Tracking\TrackCorrection\updateSegmentationStorage.m</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\bfCheckJavaMemory.m</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\bfCheckJavaPath.m</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\bfGetPlane.m</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\bfGetReader.m</file>
+      <file>C:\Users\bi1ojm\Downloads\FAST-2.2\FAST_v2_2\homePanel\bfmatlab\private\is_octave.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\FAST\for_testing" name="splash.png" optional="false">C:\Users\bi1ojm\Documents\GitHub\FAST\Deployment\FAST\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\FAST\for_testing" name="readme.txt" optional="true">C:\Users\bi1ojm\Documents\GitHub\FAST\Deployment\FAST\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\FAST\for_testing" name="FAST.exe" optional="false">C:\Users\bi1ojm\Documents\GitHub\FAST\Deployment\FAST\for_testing\FAST.exe</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2024a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
