@@ -105,7 +105,7 @@ axis(axHandBig,[xLims,yLims])
 legend(axHandBig,'Steps','Inclusion proportion');
 
 %Display trackability
-plot(axHandSmall,1:size(trackability),trackability)
+plot(axHandSmall,1:size(trackability,1),trackability)
 xlabel(axHandSmall,'Frame number','FontSize',10)
 ylabel(axHandSmall,'Trackability (bits per object)','FontSize',10)
 axis(axHandSmall,'tight')

@@ -78,7 +78,7 @@ overlaySettings.pseudoTracks = trackSettings.pseudoTracks;
 
 %Create a global colourmap object, so cells in the same track will be consistantly coloured between frames.
 colourmap = struct();
-colourmap.ID = rand(size(procTracks,2),3);
+colourmap.ID = horzcat(zeros(size(procTracks,2),1),rand(size(procTracks,2),1)/2+0.35,rand(size(procTracks,2),1)/3+0.65);
 colourmap.Raw = repmat([1,0.7,0],size(procTracks,2),1);
 if isfield(procTracks,'M')
     lineageMap = zeros(size(procTracks,2),3);
